@@ -6,15 +6,18 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Settings, Users, FolderKanban, Cpu, Play, Database, Activity } from "lucide-react";
-import type { AdminUser, ProjectRead, AgentTemplateRead, SimulationRun } from "@/types/api";
+import type { AdminUser, ProjectRead, AgentTemplateRead, SimulationRun, PaginatedProjects, PaginatedAgentTemplates } from "@/types/api";
 
 export default function AdminPage() {
   const { data: users, isLoading: usersLoading } = useQuery<AdminUser[]>({
     queryKey: ["/api/admin/users"],
   });
-  const { data: projects } = useQuery<ProjectRead[]>({ queryKey: ["/api/projects"] });
-  const { data: templates } = useQuery<AgentTemplateRead[]>({ queryKey: ["/api/agent-templates"] });
+  const { data: projectsData } = useQuery<PaginatedProjects>({ queryKey: ["/api/projects"] });
+  const { data: templatesData } = useQuery<PaginatedAgentTemplates>({ queryKey: ["/api/agent-templates"] });
   const { data: runs } = useQuery<SimulationRun[]>({ queryKey: ["/api/simulations"] });
+
+  const projects = projectsData?.items;
+  const templates = templatesData?.items;
 
   const systemHealth = [
     { name: "API Server", status: "healthy", uptime: 99.9 },

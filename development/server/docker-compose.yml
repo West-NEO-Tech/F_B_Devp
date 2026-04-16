@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8100:8000"
+      - "8100:8100"
     volumes:
       - .:/app
     environment:
@@ -39,11 +39,17 @@ services:
       LOG_LEVEL: DEBUG
       APP_VERSION: "0.1.0"
       CORS_ORIGINS: '["http://localhost:5173","http://localhost:3000"]'
+      # LLM configuration — override via .env or environment for AI features
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-sk-no-key}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8100"
 
 volumes:
   pgdata:

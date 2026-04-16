@@ -181,9 +181,9 @@ export default function SimulationsPage() {
                     <tr key={run.id} className="border-b last:border-0" data-testid={`run-${run.id}`}>
                       <td className="py-2 px-3 font-mono text-[10px]">{run.id.slice(0, 8)}</td>
                       <td className="py-2 px-3"><StatusBadge status={run.status} /></td>
-                      <td className="py-2 px-3">{run.started_at ? new Date(run.started_at).toLocaleString() : "-"}</td>
-                      <td className="py-2 px-3">{run.completed_at ? new Date(run.completed_at).toLocaleString() : "-"}</td>
-                      <td className="py-2 px-3 truncate max-w-[200px]">{run.summary || "-"}</td>
+                      <td className="py-2 px-3">{run.startedAt ? new Date(run.startedAt).toLocaleString() : "-"}</td>
+                      <td className="py-2 px-3">{run.completedAt ? new Date(run.completedAt).toLocaleString() : "-"}</td>
+                      <td className="py-2 px-3 truncate max-w-[200px]">{run.resultSummary ? JSON.stringify(run.resultSummary) : "-"}</td>
                     </tr>
                   ))}
                 </tbody>

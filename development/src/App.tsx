@@ -20,6 +20,11 @@ import NotFound from "@/pages/not-found";
 // Lazy-loaded: less-visited pages, loaded on demand
 const AgentsPage = lazy(() => import("@/pages/agents"));
 const AdminPage = lazy(() => import("@/pages/admin"));
+const SimulationsPage = lazy(() => import("@/pages/simulations"));
+const SimulationLivePage = lazy(() => import("@/pages/simulation-live"));
+const ValidationPage = lazy(() => import("@/pages/validation"));
+const ViabilityPage = lazy(() => import("@/pages/viability"));
+const ReportsPage = lazy(() => import("@/pages/reports"));
 
 function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -46,6 +51,11 @@ function Router() {
         <Route path="/projects/new" component={ProjectWizardPage} />
         <Route path="/projects/:id" component={ProjectDetailPage} />
         <Route path="/projects" component={ProjectsPage} />
+        <Route path="/simulations/live" component={SimulationLivePage} />
+        <Route path="/simulations" component={SimulationsPage} />
+        <Route path="/validation" component={ValidationPage} />
+        <Route path="/viability" component={ViabilityPage} />
+        <Route path="/reports" component={ReportsPage} />
         <Route path="/agents" component={AgentsPage} />
         <Route path="/admin" component={AdminPage} />
         <Route component={NotFound} />

@@ -1279,13 +1279,12 @@ export interface SimulationScenario {
 
 export interface SimulationRun {
   id: string;
-  scenario_id: string;
-  project_id: string;
+  scenarioId: string;
   status: string;
-  started_at: string | null;
-  completed_at: string | null;
-  summary: string | null;
-  created_at: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  resultSummary: Record<string, unknown> | null;
+  createdAt: string;
 }
 
 export interface MarketValidationResult {

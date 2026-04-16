@@ -37,4 +37,21 @@ def _apply_soft_delete_filter(execute_state):
     if execute_state.is_select and not execute_state.execution_options.get(
         "include_deleted", False
     ):
-        execute_state.statement = execute_state.statement.options()
+        # Walk the mapper entities in this query and add deleted_at IS NULL
+        # for every entity that inherits BaseMixin.
+        from sqlalchemy import inspect as sa_inspect
+
+        entities = [
+            d["entity"]
+            for d in execute_state.statement.column_descriptions
+            if d.get("entity") is not None
+        ]
+        for entity in entities:
+            try:
+                mapper = sa_inspect(entity)
+                if hasattr(mapper.class_, "deleted_at"):
+                    execute_state.statement = execute_state.statement.where(
+                        mapper.class_.deleted_at.is_(None)
+                    )
+            except Exception:
+                pass

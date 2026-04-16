@@ -37,15 +37,23 @@ export function useProjectScenario(projectId: string | undefined) {
         "GET",
         `/api/projects/${projectId}/scenarios`
       );
-      if (resp.items.length > 0) {
-        return resp.items[0];
-      }
-      const created = await apiRequest<ScenarioRead>(
+      return resp.items[0] ?? null;
+    },
+  });
+}
+
+export function useEnsureScenario(projectId: string | undefined) {
+  return useMutation({
+    mutationFn: () =>
+      apiRequest<ScenarioRead>(
         "POST",
         `/api/projects/${projectId}/scenarios`,
         { name: "Default Simulation", agentDepth: "standard" }
-      );
-      return created;
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [`/api/projects/${projectId}/scenarios`, "first"],
+      });
     },
   });
 }

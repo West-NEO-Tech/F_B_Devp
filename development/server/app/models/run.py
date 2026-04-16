@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -26,8 +27,8 @@ class SimulationRun(BaseMixin, Base):
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, server_default="'pending'"
     )
-    started_at: Mapped[None] = mapped_column(DateTime(timezone=True), nullable=True)
-    completed_at: Mapped[None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     result_summary: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     scenario = relationship("SimulationScenario", back_populates="runs")

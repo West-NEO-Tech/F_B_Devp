@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { useProject, useUpdateProject } from "@/hooks/use-project";
-import { useProjectScenario, useUpdateScenario } from "@/hooks/use-scenario";
+import { useProjectScenario, useUpdateScenario, useEnsureScenario } from "@/hooks/use-scenario";
 import {
   useLatestSeedMaterial,
   useSeedMaterials,
@@ -43,6 +43,15 @@ export default function ProjectDetailPage() {
 
   const { data: project, isLoading: projectLoading, error: projectError } = useProject(id);
   const { data: scenario, isLoading: scenarioLoading } = useProjectScenario(id);
+  const ensureScenario = useEnsureScenario(id);
+
+  // Auto-create scenario if project has none
+  useEffect(() => {
+    if (!scenarioLoading && scenario === null && id) {
+      ensureScenario.mutate();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scenarioLoading, scenario, id]);
   const { data: latestSeed } = useLatestSeedMaterial(scenario?.id);
   const { data: allSeeds } = useSeedMaterials(scenario?.id);
 
@@ -56,17 +65,21 @@ export default function ProjectDetailPage() {
   const [activeTab, setActiveTab] = useState("info");
   const [showHistory, setShowHistory] = useState(false);
 
-  // Local simulation config state
-  const [depth, setDepth] = useState<SimulationDepth>(
-    (scenario?.agentDepth as SimulationDepth) || "standard"
-  );
+  // Local simulation config state — initialised lazily; synced when scenario loads
+  const [depth, setDepth] = useState<SimulationDepth>("standard");
   const [distribution, setDistribution] = useState<Record<AgentRole, number>>(
-    () => {
-      const dist = (scenario?.marketConfig as Record<string, unknown>)?.agent_distribution;
-      if (dist && typeof dist === "object") return dist as Record<AgentRole, number>;
-      return { ...DEPTH_CONFIGS["standard"].distribution };
-    }
+    () => ({ ...DEPTH_CONFIGS["standard"].distribution })
   );
+
+  // Sync local state once the async scenario data arrives (or changes)
+  useEffect(() => {
+    if (!scenario) return;
+    if (scenario.agentDepth) setDepth(scenario.agentDepth as SimulationDepth);
+    const dist = (scenario.marketConfig as Record<string, unknown>)?.agent_distribution;
+    if (dist && typeof dist === "object") {
+      setDistribution(dist as Record<AgentRole, number>);
+    }
+  }, [scenario?.id]);
 
   // Compute step statuses
   const infoComplete = project ? isProjectInfoComplete(project) : false;

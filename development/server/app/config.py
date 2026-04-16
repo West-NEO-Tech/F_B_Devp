@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql+asyncpg://bizsim:bizsim_dev@localhost:5432/bizsim"
+    database_url: str = "postgresql+asyncpg://bizsim:bizsim_dev@localhost:5434/bizsim"
     redis_url: str = "redis://localhost:6379/0"
     log_level: str = "INFO"
     app_version: str = "0.1.0"
