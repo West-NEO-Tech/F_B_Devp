@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; height: 500pt;
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    background: #1a1e2e;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    position: relative;
+  }
+  .mesh {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 90% at 85% 60%, rgba(100,130,170,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 70% 80%, rgba(80,110,150,0.08) 0%, transparent 60%);
+  }
+  .mesh svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .content {
+    position: relative; z-index: 1;
+    padding: 48pt 56pt;
+    height: 100%;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .badge {
+    display: inline-block;
+    border: 1px solid rgba(201,169,110,0.5);
+    color: #c9a96e;
+    font-size: 8pt; font-weight: 500;
+    letter-spacing: 0.2em;
+    padding: 5pt 14pt;
+    margin-bottom: 24pt;
+  }
+  .title {
+    font-size: 72pt; font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .gold-bar {
+    width: 50pt; height: 3pt;
+    background: #c9a96e;
+    margin: 20pt 0;
+  }
+  .subtitle {
+    font-size: 20pt; font-weight: 400;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.5;
+  }
+  .tags {
+    display: flex; gap: 32pt;
+    margin-top: 28pt;
+  }
+  .tag {
+    display: flex; align-items: center; gap: 8pt;
+    font-size: 10pt; color: rgba(255,255,255,0.5);
+  }
+  .tag-dot {
+    width: 6pt; height: 6pt;
+    background: #c9a96e;
+  }
+</style>
+</head>
+<body>
+  <div class="mesh">
+    <svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="g1" cx="80%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(100,140,180,0.15)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+      </defs>
+      <rect fill="url(#g1)" width="960" height="540"/>
+      <g stroke="rgba(120,160,200,0.12)" stroke-width="0.5" fill="none">
+        <line x1="580" y1="80" x2="680" y2="150"/>
+        <line x1="680" y1="150" x2="750" y2="100"/>
+        <line x1="750" y1="100" x2="820" y2="180"/>
+        <line x1="820" y1="180" x2="900" y2="140"/>
+        <line x1="680" y1="150" x2="720" y2="250"/>
+        <line x1="720" y1="250" x2="820" y2="180"/>
+        <line x1="720" y1="250" x2="800" y2="320"/>
+        <line x1="800" y1="320" x2="900" y2="280"/>
+        <line x1="900" y1="280" x2="920" y2="200"/>
+        <line x1="900" y1="140" x2="920" y2="200"/>
+        <line x1="820" y1="180" x2="900" y2="280"/>
+        <line x1="600" y1="200" x2="680" y2="150"/>
+        <line x1="600" y1="200" x2="720" y2="250"/>
+        <line x1="600" y1="200" x2="550" y2="300"/>
+        <line x1="550" y1="300" x2="650" y2="380"/>
+        <line x1="650" y1="380" x2="800" y2="320"/>
+        <line x1="800" y1="320" x2="880" y2="400"/>
+        <line x1="880" y1="400" x2="900" y2="280"/>
+        <line x1="650" y1="380" x2="720" y2="450"/>
+        <line x1="720" y1="450" x2="880" y2="400"/>
+        <line x1="550" y1="300" x2="480" y2="380"/>
+        <line x1="480" y1="380" x2="550" y2="450"/>
+        <line x1="550" y1="450" x2="650" y2="380"/>
+        <line x1="720" y1="450" x2="550" y2="450"/>
+        <line x1="480" y1="120" x2="580" y2="80"/>
+        <line x1="480" y1="120" x2="600" y2="200"/>
+        <line x1="820" y1="50" x2="750" y2="100"/>
+        <line x1="820" y1="50" x2="900" y2="140"/>
+        <line x1="940" y1="80" x2="900" y2="140"/>
+        <line x1="940" y1="380" x2="880" y2="400"/>
+        <line x1="940" y1="380" x2="900" y2="280"/>
+      </g>
+      <g fill="rgba(140,170,210,0.25)">
+        <circle cx="580" cy="80" r="2.5"/>
+        <circle cx="680" cy="150" r="3"/>
+        <circle cx="750" cy="100" r="2"/>
+        <circle cx="820" cy="180" r="3"/>
+        <circle cx="900" cy="140" r="2.5"/>
+        <circle cx="720" cy="250" r="3"/>
+        <circle cx="800" cy="320" r="2.5"/>
+        <circle cx="900" cy="280" r="2"/>
+        <circle cx="920" cy="200" r="2"/>
+        <circle cx="600" cy="200" r="2.5"/>
+        <circle cx="550" cy="300" r="2"/>
+        <circle cx="650" cy="380" r="3"/>
+        <circle cx="880" cy="400" r="2.5"/>
+        <circle cx="720" cy="450" r="2"/>
+        <circle cx="480" cy="380" r="2"/>
+        <circle cx="550" cy="450" r="2.5"/>
+        <circle cx="480" cy="120" r="2"/>
+        <circle cx="820" cy="50" r="2"/>
+        <circle cx="940" cy="80" r="1.5"/>
+        <circle cx="940" cy="380" r="1.5"/>
+      </g>
+    </svg>
+  </div>
+  <div class="content">
+    <div class="badge">BUSINESS PLAN</div>
+    <div class="title">BizSim</div>
+    <div class="gold-bar"></div>
+    <div class="subtitle">Large-Scale Market Simulation Powered by<br>Thousands of AI Agents × Startup Validation Platform</div>
+    <div class="tags">
+      <div class="tag"><div class="tag-dot"></div>Australian Market</div>
+      <div class="tag"><div class="tag-dot"></div>AI-Driven</div>
+      <div class="tag"><div class="tag-dot"></div>High-Margin Model</div>
+    </div>
+  </div>
+</body>
+</html>

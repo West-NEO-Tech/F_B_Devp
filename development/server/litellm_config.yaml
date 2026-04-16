@@ -1,0 +1,19 @@
+# LiteLLM Proxy Configuration — Local Development
+#
+# Uses GitHub Copilot as the LLM backend (requires Copilot subscription).
+# Authentication: OAuth device flow — on first run LiteLLM will print a URL
+# and code; open the URL in your browser, enter the code, and authorize once.
+# Credentials are cached locally after that.
+#
+# Start with:
+#   ./server/scripts/start-litellm.sh
+#
+# Documentation: https://docs.litellm.ai/docs/providers/github_copilot
+
+model_list:
+  - model_name: gpt-4o
+    litellm_params:
+      model: github_copilot/gpt-4o
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: github_copilot/gpt-4o-mini

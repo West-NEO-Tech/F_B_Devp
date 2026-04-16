@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; height: 500pt;
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #1a1e2e;
+    padding: 28pt 44pt;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-label { font-size: 9pt; color: #c9a96e; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+  .page-title { font-size: 26pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; }
+  .gold-bar { width: 50pt; height: 3pt; background: #c9a96e; margin: 10pt 0 14pt 0; }
+  .main { display: flex; gap: 16pt; }
+  .left {
+    flex: 1;
+    background: #252a3a;
+    border-left: 3px solid rgba(255,255,255,0.06);
+    padding: 12pt 16pt;
+    border-radius: 2pt;
+  }
+  .left-title { font-size: 11pt; font-weight: 700; color: #e0ddd5; margin-bottom: 10pt; }
+  .agent-row {
+    display: flex; align-items: flex-start; gap: 10pt;
+    padding: 6pt 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .agent-row:last-child { border-bottom: none; }
+  .agent-count {
+    font-size: 11pt; font-weight: 700; color: #6b8fad;
+    width: 36pt; text-align: right; flex-shrink: 0; line-height: 1.2;
+  }
+  .agent-info { flex: 1; }
+  .agent-name { font-size: 9pt; font-weight: 600; color: #e0ddd5; }
+  .agent-desc { font-size: 7.5pt; color: #8b8a85; margin-top: 1pt; }
+  .right { width: 280pt; display: flex; flex-direction: column; gap: 10pt; }
+  .modules-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 12pt 14pt;
+    border-radius: 2pt;
+  }
+  .modules-title { font-size: 11pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4pt 8pt; }
+  .module-item { font-size: 8pt; color: #8b8a85; display: flex; align-items: center; gap: 4pt; }
+  .module-dot { color: #5a9a5a; font-size: 8pt; }
+  .compare-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 12pt 14pt;
+    border-radius: 2pt;
+  }
+  .compare-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  .compare-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5pt 8pt;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 8.5pt;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-name { color: #8b8a85; }
+  .compare-val { color: #8b8a85; font-weight: 500; }
+  .compare-row.highlight {
+    background: rgba(201,169,110,0.08);
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 2pt;
+  }
+  .compare-row.highlight .compare-name { color: #e0ddd5; font-weight: 600; }
+  .compare-row.highlight .compare-val { color: #c9a96e; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="section-label">PRODUCT CORE</div>
+  <div class="page-title">产品核心：8种Agent × 14个功能模块</div>
+  <div class="gold-bar"></div>
+  <div class="main">
+    <div class="left">
+      <div class="left-title">👥 8种Agent类型</div>
+      <div class="agent-row">
+        <div class="agent-count">200-<br>800</div>
+        <div class="agent-info"><div class="agent-name">Consumer（消费者）</div><div class="agent-desc">消费偏好、价格敏感度、口碑传播</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">50-<br>200</div>
+        <div class="agent-info"><div class="agent-name">Enterprise Buyer（企业客户）</div><div class="agent-desc">采购流程、预算评估、供应商对比</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">30-<br>100</div>
+        <div class="agent-info"><div class="agent-name">Competitor（竞争对手）</div><div class="agent-desc">威胁评估、竞品反应策略、价格战</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">10-<br>50</div>
+        <div class="agent-info"><div class="agent-name">Investor（投资人）</div><div class="agent-desc">估值分析、市场规模评估、风险判断</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">10-<br>50</div>
+        <div class="agent-info"><div class="agent-name">Supplier（供应商）</div><div class="agent-desc">合作条件、定价议约、供应能力</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">5-<br>20</div>
+        <div class="agent-info"><div class="agent-name">Regulator（监管方）</div><div class="agent-desc">合规审查、资质要求、政策风险</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">5-<br>20</div>
+        <div class="agent-info"><div class="agent-name">Technical Expert（技术专家）</div><div class="agent-desc">技术可行性、架构风险、技术债</div></div>
+      </div>
+      <div class="agent-row">
+        <div class="agent-count">3-<br>10</div>
+        <div class="agent-info"><div class="agent-name">Mentor（导师）</div><div class="agent-desc">战略建议、行业洞察、经验传承</div></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="modules-card">
+        <div class="modules-title">🏗 14个功能模块</div>
+        <div class="modules-grid">
+          <div class="module-item"><span class="module-dot">●</span> Overview 仪表盘</div>
+          <div class="module-item"><span class="module-dot">●</span> Projects 管理</div>
+          <div class="module-item"><span class="module-dot">●</span> Idea Discovery</div>
+          <div class="module-item"><span class="module-dot">●</span> Evaluation 五维评分</div>
+          <div class="module-item"><span class="module-dot">●</span> Prototypes 原型</div>
+          <div class="module-item"><span class="module-dot">●</span> Agent Populations</div>
+          <div class="module-item"><span class="module-dot">●</span> Simulations 模拟</div>
+          <div class="module-item"><span class="module-dot">●</span> Market Validation</div>
+          <div class="module-item"><span class="module-dot">●</span> Business Viability</div>
+          <div class="module-item"><span class="module-dot">●</span> Investment Matching</div>
+          <div class="module-item"><span class="module-dot">●</span> Knowledge Graph</div>
+          <div class="module-item"><span class="module-dot">●</span> Reports 报告</div>
+          <div class="module-item"><span class="module-dot">●</span> Admin 管理后台</div>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-title">🏆 与竞品的本质差异</div>
+        <div class="compare-row">
+          <span class="compare-name">ValidatorAI</span>
+          <span class="compare-val">单 LLM 问答</span>
+        </div>
+        <div class="compare-row">
+          <span class="compare-name">IdeaProof</span>
+          <span class="compare-val">7-8 固定角色串行</span>
+        </div>
+        <div class="compare-row highlight">
+          <span class="compare-name">BizSim</span>
+          <span class="compare-val">数百 Agent 市场模拟涌现</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

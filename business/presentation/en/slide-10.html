@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; min-height: 405pt;
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    background: #1a1e2e;
+    padding: 28pt 44pt;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-label { font-size: 9pt; color: #c9a96e; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+  .page-title { font-size: 26pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; }
+  .gold-bar { width: 50pt; height: 3pt; background: #c9a96e; margin: 10pt 0 16pt 0; }
+  .main { display: flex; gap: 20pt; }
+  .founder {
+    flex: 1;
+    background: #252a3a;
+    border-radius: 4pt;
+    padding: 16pt;
+    display: flex; flex-direction: column; align-items: center;
+    border-top: 3px solid #c9a96e;
+  }
+  .photo {
+    width: 80pt; height: 80pt;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2pt solid rgba(201,169,110,0.3);
+    margin-bottom: 10pt;
+    background: #1e2230;
+  }
+  .founder-name { font-size: 14pt; font-weight: 700; color: #e0ddd5; }
+  .founder-role { font-size: 8pt; color: #c9a96e; font-weight: 500; letter-spacing: 0.05em; margin-top: 2pt; margin-bottom: 8pt; }
+  .founder-bio { font-size: 7.5pt; color: #8b8a85; line-height: 1.7; text-align: left; width: 100%; }
+  .bio-item { margin-bottom: 3pt; display: flex; align-items: flex-start; gap: 4pt; }
+  .bio-dot { color: #c9a96e; flex-shrink: 0; margin-top: 1pt; }
+  .highlight-tag {
+    display: inline-block;
+    font-size: 6.5pt;
+    color: #c9a96e;
+    border: 1px solid rgba(201,169,110,0.3);
+    padding: 2pt 6pt;
+    border-radius: 2pt;
+    margin-top: 4pt;
+    margin-right: 3pt;
+  }
+  .divider {
+    width: 40pt; height: 1pt;
+    background: rgba(201,169,110,0.3);
+    margin: 8pt 0;
+  }
+  .team-value {
+    margin-top: 14pt;
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 10pt 16pt;
+    border-radius: 2pt;
+    display: flex; gap: 20pt;
+  }
+  .tv-item { flex: 1; }
+  .tv-title { font-size: 9pt; font-weight: 700; color: #e0ddd5; margin-bottom: 3pt; }
+  .tv-text { font-size: 7.5pt; color: #8b8a85; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <div class="section-label">FOUNDING TEAM</div>
+  <div class="page-title">Founding Team</div>
+  <div class="gold-bar"></div>
+  <div class="main">
+    <div class="founder">
+      <img class="photo" src="../img/jianxin%20li.png" alt="Prof. Jianxin Li">
+      <div class="founder-name">Prof. Jianxin Li</div>
+      <div class="founder-role">Co-Founder · Chief Scientist</div>
+      <div class="divider"></div>
+      <div class="founder-bio">
+        <div class="bio-item"><span class="bio-dot">▸</span> <strong style="color:#e0ddd5;">Full Professor</strong> of Information Systems, Edith Cowan University</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> 200+ publications in top-tier venues (IEEE ICDE, TKDE, etc.)</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> <strong style="color:#e0ddd5;">Australia's Top 250 Researchers</strong> (2025)</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> Stanford <strong style="color:#e0ddd5;">World's Top 2% Scientists</strong> (2022–)</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> Most Influential Paper Award (ISJ, 2025)</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> Multiple ARC Discovery/Linkage research grants</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> Founding Editor of Array journal, IEEE Senior Member</div>
+      </div>
+      <div>
+        <span class="highlight-tag">AI & Data Science</span>
+        <span class="highlight-tag">Information Systems</span>
+        <span class="highlight-tag">Academic Network</span>
+      </div>
+    </div>
+    <div class="founder">
+      <img class="photo" src="../img/yifu%20tang.png" alt="Dr. Yifu Tang">
+      <div class="founder-name">Dr. Yifu Tang</div>
+      <div class="founder-role">Co-Founder · Technical Lead</div>
+      <div class="divider"></div>
+      <div class="founder-bio">
+        <div class="bio-item"><span class="bio-dot">▸</span> <strong style="color:#e0ddd5;">Postdoctoral Researcher</strong> in Computer Science, focused on knowledge graph and AI research & practice</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> Led and delivered multiple AI projects (finance, manufacturing), bridging tech to business applications</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> 0-to-1 AI product design, driving model capabilities into real-world deployment</div>
+        <div class="bio-item"><span class="bio-dot">▸</span> End-to-end AI system building, including solution design, implementation, and delivery</div>
+      </div>
+      <div style="margin-top: 18pt;">
+        <span class="highlight-tag">Knowledge Graph</span>
+        <span class="highlight-tag">AI Product Delivery</span>
+        <span class="highlight-tag">End-to-End Systems</span>
+      </div>
+    </div>
+  </div>
+  <div class="team-value">
+    <div class="tv-item">
+      <div class="tv-title">🎓 Academic Depth</div>
+      <div class="tv-text">Core team has cutting-edge research capabilities in AI and multi-agent systems</div>
+    </div>
+    <div class="tv-item">
+      <div class="tv-title">💡 Founder Perspective</div>
+      <div class="tv-text">First-hand experience with startup validation pain points — we are our own first users</div>
+    </div>
+    <div class="tv-item">
+      <div class="tv-title">🔗 Academic Network</div>
+      <div class="tv-text">Fast access to university channels for distribution and partnerships</div>
+    </div>
+    <div class="tv-item">
+      <div class="tv-title">🎤 Training Capability</div>
+      <div class="tv-text">University teaching experience enables direct workshop delivery</div>
+    </div>
+  </div>
+</body>
+</html>

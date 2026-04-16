@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizSim — Simulation Live View</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f0; color: #3a3530; display: flex; height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: #2c2824; display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-brand { padding: 20px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #3d3530; }
+  .sidebar-brand .logo { width: 28px; height: 28px; background: #a3907e; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 15px; }
+  .sidebar-brand span { color: #e8e3dc; font-size: 16px; font-weight: 600; }
+  .sidebar nav { padding: 12px 0; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 18px; color: #9a928a; font-size: 13px; cursor: pointer; transition: background .15s; }
+  .nav-item:hover { background: #3d3530; color: #d5cec5; }
+  .nav-item.active { background: #3d3530; color: #fff; border-left: 3px solid #a3907e; padding-left: 15px; }
+  .nav-icon { width: 18px; text-align: center; font-size: 14px; }
+  .sidebar-footer { padding: 14px 18px; border-top: 1px solid #3d3530; }
+  .sidebar-footer p { color: #6b6360; font-size: 11px; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { background: #fff; border-bottom: 1px solid #e8e3dc; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar h1 { font-size: 18px; font-weight: 600; }
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .status-running { background: #e8f5e9; color: #2e7d32; }
+  .status-running::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #4caf50; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+
+  .content { flex: 1; display: flex; overflow: hidden; }
+
+  /* Timeline Panel */
+  .timeline-panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #e8e3dc; }
+  .progress-bar-wrap { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e8e3dc; }
+  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .progress-header span { font-size: 13px; color: #8a827a; }
+  .progress-header strong { font-size: 13px; color: #3a3530; }
+  .progress-track { height: 6px; background: #e8e3dc; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #7a9e7e, #a3907e); border-radius: 3px; width: 50%; transition: width .3s; }
+  .progress-stats { display: flex; gap: 24px; margin-top: 10px; }
+  .progress-stats .stat { font-size: 12px; color: #8a827a; }
+  .progress-stats .stat strong { color: #3a3530; }
+
+  .timeline-feed { flex: 1; overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 3px; }
+  .interaction { display: flex; gap: 10px; padding: 10px 12px; border-radius: 8px; transition: background .1s; }
+  .interaction:hover { background: #f0ece5; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
+  .avatar.consumer { background: #7a9e7e; }
+  .avatar.competitor { background: #c0756b; }
+  .avatar.investor { background: #a3907e; }
+  .avatar.enterprise { background: #5a524a; }
+  .avatar.supplier { background: #6b8eaa; }
+  .avatar.regulator { background: #8a827a; }
+  .avatar.mentor { background: #b5a99a; }
+  .avatar.expert { background: #6b6360; }
+  .interaction-body { flex: 1; min-width: 0; }
+  .interaction-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+  .agent-name { font-size: 12px; font-weight: 600; color: #3a3530; }
+  .agent-tag { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: #f0ece5; color: #8a827a; }
+  .interaction-time { font-size: 10px; color: #b5a99a; margin-left: auto; }
+  .interaction-text { font-size: 13px; color: #5a524a; line-height: 1.55; }
+  .sentiment-chip { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-top: 4px; }
+  .sentiment-positive { background: #e8f5e9; color: #2e7d32; }
+  .sentiment-negative { background: #fce4ec; color: #c62828; }
+  .sentiment-neutral { background: #f0ece5; color: #8a827a; }
+  .sentiment-cautious { background: #fff8e1; color: #f57f17; }
+
+  .thinking-indicator { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+  .thinking-dots { display: flex; gap: 4px; }
+  .thinking-dots span { width: 6px; height: 6px; border-radius: 50%; background: #b5a99a; animation: blink 1.4s infinite; }
+  .thinking-dots span:nth-child(2) { animation-delay: .2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .3; } 40% { opacity: 1; } }
+  .thinking-label { font-size: 12px; color: #b5a99a; font-style: italic; }
+
+  /* Right Metrics Panel */
+  .metrics-panel { width: 300px; background: #fff; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .panel-title { font-size: 11px; font-weight: 600; color: #a3907e; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+  .metric-card { background: #f9f7f3; border-radius: 8px; padding: 14px; }
+  .metric-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .metric-value { font-size: 24px; font-weight: 700; color: #3a3530; }
+  .metric-label { font-size: 11px; color: #8a827a; margin-top: 2px; }
+  .metric-change { font-size: 11px; font-weight: 500; }
+  .metric-change.up { color: #2e7d32; }
+  .metric-change.down { color: #c62828; }
+
+  .mini-chart { height: 40px; display: flex; align-items: flex-end; gap: 3px; margin-top: 10px; }
+  .mini-bar { flex: 1; background: #d5cec5; border-radius: 2px 2px 0 0; min-height: 4px; transition: height .3s; }
+  .mini-bar.accent { background: #7a9e7e; }
+
+  .agent-status-list { display: flex; flex-direction: column; gap: 6px; }
+  .agent-status-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .agent-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-active { background: #4caf50; }
+  .dot-idle { background: #d5cec5; }
+  .dot-done { background: #a3907e; }
+  .agent-status-name { flex: 1; color: #5a524a; }
+  .agent-status-count { color: #8a827a; font-size: 11px; }
+
+  .objections-list { display: flex; flex-direction: column; gap: 6px; }
+  .objection-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .objection-bar-track { flex: 1; height: 5px; background: #e8e3dc; border-radius: 3px; overflow: hidden; }
+  .objection-bar-fill { height: 100%; border-radius: 3px; background: #c0756b; }
+  .objection-label { color: #5a524a; min-width: 70px; }
+  .objection-pct { color: #8a827a; font-size: 11px; min-width: 30px; text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">B</div>
+    <span>BizSim</span>
+  </div>
+  <nav>
+    <div class="nav-item"><span class="nav-icon">◻</span> Overview</div>
+    <div class="nav-item"><span class="nav-icon">✦</span> Ideas</div>
+    <div class="nav-item"><span class="nav-icon">◎</span> Evaluation</div>
+    <div class="nav-item"><span class="nav-icon">⊞</span> Agent Populations</div>
+    <div class="nav-item active"><span class="nav-icon">▶</span> Simulations</div>
+    <div class="nav-item"><span class="nav-icon">◈</span> Market Validation</div>
+    <div class="nav-item"><span class="nav-icon">⊡</span> Reports</div>
+  </nav>
+  <div class="sidebar-footer">
+    <p>BizSim v1.0 · MVP</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <h1>Simulation: 宠物健康订阅盒</h1>
+      <span class="status-badge status-running">Running</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button style="padding:6px 14px;border:1px solid #d5cec5;border-radius:6px;background:#fff;font-size:12px;color:#5a524a;cursor:pointer;">Pause</button>
+      <button style="padding:6px 14px;border:none;border-radius:6px;background:#c0756b;font-size:12px;color:#fff;cursor:pointer;">Stop</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Timeline -->
+    <div class="timeline-panel">
+      <div class="progress-bar-wrap">
+        <div class="progress-header">
+          <span>Round <strong>15</strong> / 30</span>
+          <strong>50%</strong>
+        </div>
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <div class="progress-stats">
+          <div class="stat"><strong>234</strong> interactions</div>
+          <div class="stat"><strong>187</strong> agents active</div>
+          <div class="stat">Elapsed: <strong>8.2s</strong></div>
+          <div class="stat">Est. remaining: <strong>~7s</strong></div>
+        </div>
+      </div>
+
+      <div class="timeline-feed">
+        <!-- Round header -->
+        <div style="padding:6px 0;margin:4px 0;">
+          <span style="font-size:10px;color:#a3907e;font-weight:600;letter-spacing:.06em;">━━ ROUND 15 ━━</span>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar consumer">C</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Consumer_042</span>
+              <span class="agent-tag">独立咖啡店老板 · 32岁</span>
+              <span class="interaction-time">0.3s ago</span>
+            </div>
+            <p class="interaction-text">这个宠物订阅盒概念挺有意思。作为养了两只猫的人，每个月花 $39 还算合理，但关键是能不能根据品种定制。我之前试过几个品牌，最烦的就是收到我猫不吃的零食。</p>
+            <span class="sentiment-chip sentiment-cautious">Cautious Positive</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar enterprise">E</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Enterprise_008</span>
+              <span class="agent-tag">连锁宠物店采购经理</span>
+              <span class="interaction-time">0.3s ago</span>
+            </div>
+            <p class="interaction-text">从渠道角度看，这类 D2C 订阅模式会直接影响我们的高毛利品类。不过如果品质确实好，我们也可以考虑合作分销——前提是他们给我们独家SKU。</p>
+            <span class="sentiment-chip sentiment-neutral">Neutral</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar competitor">X</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Competitor_003</span>
+              <span class="agent-tag">BarkBox 区域竞品</span>
+              <span class="interaction-time">0.2s ago</span>
+            </div>
+            <p class="interaction-text">又一个宠物订阅盒。这个赛道在北美已经很卷了，但澳洲市场确实还有空间。他们如果能在本土供应链上做出差异化，会比较难追。我们的弱点就是跨境物流成本高。</p>
+            <span class="sentiment-chip sentiment-negative">Threatened</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar investor">I</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Investor_002</span>
+              <span class="agent-tag">天使投资人 · 消费科技</span>
+              <span class="interaction-time">0.1s ago</span>
+            </div>
+            <p class="interaction-text">单位经济模型还需要看。宠物订阅这个品类 LTV/CAC 比通常在 2.5-3x，Customer Churn 是关键。如果月 churn 低于 8%，这个模型就跑得通。建议先用 $39 单价测试 PMF。</p>
+            <span class="sentiment-chip sentiment-positive">Positive</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar supplier">S</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Supplier_005</span>
+              <span class="agent-tag">本地宠物食品工厂</span>
+              <span class="interaction-time">0.1s ago</span>
+            </div>
+            <p class="interaction-text">如果每月稳定订单达到 500 盒以上，我们可以提供定制包装和配方。最小起订量的问题可以通过联合采购解决。</p>
+            <span class="sentiment-chip sentiment-positive">Supportive</span>
+          </div>
+        </div>
+
+        <!-- Earlier round -->
+        <div style="padding:6px 0;margin:8px 0 4px;">
+          <span style="font-size:10px;color:#a3907e;font-weight:600;letter-spacing:.06em;">━━ ROUND 14 ━━</span>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar consumer">C</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Consumer_117</span>
+              <span class="agent-tag">年轻职场妈妈 · 28岁</span>
+              <span class="interaction-time">1.2s ago</span>
+            </div>
+            <p class="interaction-text">$39/月有点犹豫。如果有 $29 的基础版只包含必需品（粮+零食），高级版再加玩具和保健品，我可能更愿意先从基础版试试。</p>
+            <span class="sentiment-chip sentiment-cautious">Price Sensitive</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar regulator">R</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Regulator_001</span>
+              <span class="agent-tag">APVMA 合规顾问</span>
+              <span class="interaction-time">1.1s ago</span>
+            </div>
+            <p class="interaction-text">宠物保健品需要确认是否属于 APVMA 注册范围。如果包含声称有治疗功能的成分，需要额外注册流程，大约 3-6 个月。建议初期只做食品和玩具类。</p>
+            <span class="sentiment-chip sentiment-neutral">Advisory</span>
+          </div>
+        </div>
+
+        <div class="interaction">
+          <div class="avatar mentor">M</div>
+          <div class="interaction-body">
+            <div class="interaction-meta">
+              <span class="agent-name">Mentor_001</span>
+              <span class="agent-tag">消费品创业导师</span>
+              <span class="interaction-time">1.0s ago</span>
+            </div>
+            <p class="interaction-text">先别急着做全品类。Pick 一个细分——比如"猫咪健康零食盒"——做深做透。等到 500 订阅用户再扩品类。BarkBox 最早也是从一个品类开始的。</p>
+            <span class="sentiment-chip sentiment-positive">Strategic</span>
+          </div>
+        </div>
+
+        <!-- Thinking indicator -->
+        <div class="thinking-indicator">
+          <div class="avatar expert">T</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="font-size:12px;color:#5a524a;font-weight:500;">Technical_002</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <div class="thinking-dots"><span></span><span></span><span></span></div>
+              <span class="thinking-label">analyzing supply chain feasibility...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Metrics -->
+    <div class="metrics-panel">
+      <div>
+        <p class="panel-title">Live Metrics</p>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-row">
+          <div>
+            <div class="metric-value">54%</div>
+            <div class="metric-label">Adoption Willingness</div>
+          </div>
+          <span class="metric-change up">↑ 3.2%</span>
+        </div>
+        <div class="mini-chart">
+          <div class="mini-bar" style="height:30%"></div>
+          <div class="mini-bar" style="height:35%"></div>
+          <div class="mini-bar" style="height:32%"></div>
+          <div class="mini-bar" style="height:38%"></div>
+          <div class="mini-bar" style="height:40%"></div>
+          <div class="mini-bar" style="height:42%"></div>
+          <div class="mini-bar" style="height:44%"></div>
+          <div class="mini-bar" style="height:46%"></div>
+          <div class="mini-bar" style="height:45%"></div>
+          <div class="mini-bar" style="height:48%"></div>
+          <div class="mini-bar" style="height:50%"></div>
+          <div class="mini-bar" style="height:51%"></div>
+          <div class="mini-bar" style="height:52%"></div>
+          <div class="mini-bar accent" style="height:54%"></div>
+          <div class="mini-bar accent" style="height:54%"></div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-row">
+          <div>
+            <div class="metric-value">$35</div>
+            <div class="metric-label">Price Acceptance Median</div>
+          </div>
+          <span class="metric-change down">↓ $4</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-row">
+          <div>
+            <div class="metric-value">67%</div>
+            <div class="metric-label">Positive Sentiment</div>
+          </div>
+          <span class="metric-change up">↑ 5%</span>
+        </div>
+      </div>
+
+      <div>
+        <p class="panel-title">Top Objections</p>
+        <div class="objections-list" style="margin-top:8px;">
+          <div class="objection-item">
+            <span class="objection-label">Price too high</span>
+            <div class="objection-bar-track"><div class="objection-bar-fill" style="width:42%"></div></div>
+            <span class="objection-pct">42%</span>
+          </div>
+          <div class="objection-item">
+            <span class="objection-label">Customization</span>
+            <div class="objection-bar-track"><div class="objection-bar-fill" style="width:35%"></div></div>
+            <span class="objection-pct">35%</span>
+          </div>
+          <div class="objection-item">
+            <span class="objection-label">Brand trust</span>
+            <div class="objection-bar-track"><div class="objection-bar-fill" style="width:23%"></div></div>
+            <span class="objection-pct">23%</span>
+          </div>
+          <div class="objection-item">
+            <span class="objection-label">Delivery time</span>
+            <div class="objection-bar-track"><div class="objection-bar-fill" style="width:18%"></div></div>
+            <span class="objection-pct">18%</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="panel-title">Agent Activity</p>
+        <div class="agent-status-list" style="margin-top:8px;">
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-active"></span>
+            <span class="agent-status-name">Consumers</span>
+            <span class="agent-status-count">142 / 150</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-active"></span>
+            <span class="agent-status-name">Enterprise Buyers</span>
+            <span class="agent-status-count">18 / 20</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-active"></span>
+            <span class="agent-status-name">Competitors</span>
+            <span class="agent-status-count">8 / 8</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-active"></span>
+            <span class="agent-status-name">Investors</span>
+            <span class="agent-status-count">5 / 5</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-done"></span>
+            <span class="agent-status-name">Suppliers</span>
+            <span class="agent-status-count">6 / 6</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-done"></span>
+            <span class="agent-status-name">Regulators</span>
+            <span class="agent-status-count">3 / 3</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-idle"></span>
+            <span class="agent-status-name">Mentors</span>
+            <span class="agent-status-count">2 / 2</span>
+          </div>
+          <div class="agent-status-row">
+            <span class="agent-status-dot dot-active"></span>
+            <span class="agent-status-name">Tech Experts</span>
+            <span class="agent-status-count">3 / 3</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:auto;">
+        <div style="background:#f9f7f3;border-radius:8px;padding:12px;text-align:center;">
+          <p style="font-size:11px;color:#8a827a;">Total Agents</p>
+          <p style="font-size:28px;font-weight:700;color:#3a3530;">187</p>
+          <p style="font-size:11px;color:#a3907e;">across 8 stakeholder types</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

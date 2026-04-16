@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; min-height: 405pt;
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    background: #1a1e2e;
+    padding: 28pt 44pt;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-label { font-size: 9pt; color: #c9a96e; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+  .page-title { font-size: 26pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; }
+  .gold-bar { width: 50pt; height: 3pt; background: #c9a96e; margin: 10pt 0 14pt 0; }
+  .top-cards { display: flex; gap: 12pt; margin-bottom: 10pt; }
+  .top-card {
+    flex: 1;
+    background: #252a3a;
+    border-top: 2px solid rgba(255,255,255,0.06);
+    padding: 12pt 14pt;
+    border-radius: 2pt;
+  }
+  .top-card-header { display: flex; align-items: center; gap: 8pt; margin-bottom: 8pt; }
+  .top-icon {
+    width: 28pt; height: 28pt;
+    background: #2a3048;
+    border-radius: 6pt;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14pt;
+  }
+  .top-card-title { font-size: 11pt; font-weight: 700; color: #e0ddd5; }
+  .top-card-text { font-size: 7.5pt; color: #8b8a85; line-height: 1.6; }
+  .top-card-text strong { color: #c9a96e; }
+  .top-card-item { font-size: 7.5pt; color: #8b8a85; line-height: 1.7; }
+  .check { color: #c9a96e; margin-right: 4pt; }
+  .bottom { display: flex; gap: 12pt; }
+  .table-card {
+    width: 260pt; flex-shrink: 0;
+    background: #252a3a;
+    border-left: 3px solid rgba(255,255,255,0.06);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .table-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 7pt; color: #8b8a85; font-weight: 500; text-align: left; padding: 4pt 6pt; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  td { font-size: 8pt; color: #e0ddd5; padding: 5pt 6pt; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .barrier-card {
+    flex: 1;
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+    display: flex; flex-direction: column; gap: 6pt;
+  }
+  .barrier-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 4pt; }
+  .barrier-block {
+    background: #1e2230;
+    padding: 8pt 10pt;
+    border-radius: 2pt;
+  }
+  .barrier-name { font-size: 8.5pt; font-weight: 600; color: #e0ddd5; }
+  .barrier-desc { font-size: 7pt; color: #8b8a85; margin-top: 2pt; line-height: 1.5; }
+  .tags-row { display: flex; gap: 5pt; margin-top: 6pt; }
+  .tag {
+    font-size: 7pt; color: #c9a96e;
+    border: 1px solid rgba(201,169,110,0.3);
+    padding: 3pt 8pt;
+    border-radius: 2pt;
+  }
+  .opt-title { font-size: 9pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; margin-bottom: 4pt; }
+</style>
+</head>
+<body>
+  <div class="section-label">TECHNICAL ADVANTAGES</div>
+  <div class="page-title">Technical Advantages: Large-Scale Agent Simulation Engine</div>
+  <div class="gold-bar"></div>
+  <div class="top-cards">
+    <div class="top-card">
+      <div class="top-card-header">
+        <div class="top-icon">⚙</div>
+        <div class="top-card-title">Simulation Quality</div>
+      </div>
+      <div class="top-card-text"><strong>Hierarchical coordination architecture</strong> supports hundreds of agents in concurrent interaction — not simple sequential calls, but genuine multi-agent market dynamics</div>
+      <div class="top-card-item"><span class="check">✔</span> Rich agent persona system</div>
+      <div class="top-card-item"><span class="check">✔</span> Full backgrounds, economic traits, decision logic</div>
+      <div class="top-card-item"><span class="check">✔</span> Ensures diversity and realism in results</div>
+    </div>
+    <div class="top-card" style="border-top-color: #6b8fad;">
+      <div class="top-card-header">
+        <div class="top-icon" style="background: #253040;">🔊</div>
+        <div class="top-card-title">Emergent Analysis</div>
+      </div>
+      <div class="top-card-text">Conclusions are <strong>not pre-programmed</strong> — they <strong>naturally emerge</strong> from agent group behavior</div>
+      <div class="top-card-item"><span class="check">✔</span> Adoption curve: realistic user adoption modeling</div>
+      <div class="top-card-item"><span class="check">✔</span> Word-of-mouth: organic spread between agents</div>
+      <div class="top-card-item"><span class="check">✔</span> Competitor reactions: dynamic competitive response</div>
+    </div>
+    <div class="top-card" style="border-top-color: #c9a96e;">
+      <div class="top-card-header">
+        <div class="top-icon" style="background: #2e2a20;">$</div>
+        <div class="top-card-title">Cost-Effective</div>
+      </div>
+      <div class="top-card-text"><strong>Tiered LLM dispatch</strong> and <strong>smart caching</strong> compress large-scale simulation API costs into a commercially viable range</div>
+      <div class="top-card-item"><span class="check">✔</span> Strong models for high-value interactions</div>
+      <div class="top-card-item"><span class="check">✔</span> Lightweight models for background behavior</div>
+      <div class="top-card-item"><span class="check">✔</span> Reuse inference for similar personas</div>
+    </div>
+  </div>
+  <div class="bottom">
+    <div class="table-card">
+      <div class="table-title">⊞ Cost & Delivery Comparison</div>
+      <table>
+        <tr><th>Tier</th><th>Agents</th><th>Cost</th><th>Delivery</th></tr>
+        <tr><td>Quick Scan</td><td>50-100</td><td>A$1-2</td><td>Seconds</td></tr>
+        <tr><td>Standard</td><td>300-500</td><td>A$10-15</td><td>~20s</td></tr>
+        <tr><td>Deep Dive</td><td>1000+</td><td>A$25-35</td><td>~1-2 min</td></tr>
+        <tr><td>Enterprise</td><td>Thousands</td><td>A$50-80</td><td>~3-5 min</td></tr>
+      </table>
+    </div>
+    <div class="barrier-card">
+      <div class="barrier-title">⛨ Technical Moats</div>
+      <div class="barrier-block">
+        <div class="barrier-name">Engine-Level Complexity</div>
+        <div class="barrier-desc">Competitors would need to rewrite their architecture from prompt chains to a full simulation engine</div>
+      </div>
+      <div class="barrier-block">
+        <div class="barrier-name">Academic Research Foundation</div>
+        <div class="barrier-desc">Team brings multi-agent systems research, combining social simulation and collective intelligence methodologies</div>
+      </div>
+      <div class="barrier-block">
+        <div class="barrier-name">Continuous Optimization</div>
+        <div class="barrier-desc">As simulation data accumulates, we can train more precise agent behavior models — creating a data flywheel</div>
+      </div>
+      <div class="opt-title">Core Optimization Strategies</div>
+      <div class="tags-row">
+        <div class="tag">Tiered LLM Dispatch</div>
+        <div class="tag">Smart Caching</div>
+        <div class="tag">Batching</div>
+        <div class="tag">Dynamic Scaling</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

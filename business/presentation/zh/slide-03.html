@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; min-height: 405pt;
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #1a1e2e;
+    padding: 28pt 44pt;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-label { font-size: 9pt; color: #c9a96e; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+  .page-title { font-size: 26pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; }
+  .gold-bar { width: 50pt; height: 3pt; background: #c9a96e; margin: 10pt 0 14pt 0; }
+  .main { display: flex; gap: 16pt; height: 280pt; }
+  .left { flex: 1; display: flex; flex-direction: column; gap: 10pt; }
+  .right { width: 260pt; display: flex; flex-direction: column; gap: 10pt; }
+  .card {
+    background: #252a3a;
+    border-left: 3px solid rgba(255,255,255,0.06);
+    padding: 14pt 16pt;
+    border-radius: 2pt;
+  }
+  .card-title { font-size: 11pt; font-weight: 700; color: #e0ddd5; margin-bottom: 6pt; }
+  .card-text { font-size: 8.5pt; color: #8b8a85; line-height: 1.6; }
+  .card-text strong { color: #c9a96e; font-weight: 600; }
+  .right-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 12pt 14pt;
+    border-radius: 2pt;
+    flex: 1;
+  }
+  .right-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 10pt; }
+  .bar-group { margin-bottom: 10pt; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 8pt; color: #8b8a85; margin-bottom: 3pt; }
+  .bar-label .val { color: #e0ddd5; font-weight: 600; }
+  .bar-track { height: 4pt; background: rgba(255,255,255,0.06); border-radius: 2pt; }
+  .bar-fill { height: 4pt; border-radius: 2pt; }
+  .bar-fill-low { width: 5%; background: #8b8a85; }
+  .bar-fill-mid { width: 25%; background: #6b8fad; }
+  .bar-fill-full { width: 95%; background: #c9a96e; }
+  .bar-highlight { font-size: 8pt; color: #c9a96e; font-weight: 600; margin-top: 2pt; }
+  .check { color: #5a9a5a; margin-right: 4pt; }
+  .target-box {
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .target-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 4pt; }
+  .target-text { font-size: 8pt; color: #8b8a85; line-height: 1.6; }
+  .target-text strong { color: #c9a96e; }
+  .stats-row {
+    display: flex; gap: 0;
+  }
+  .stat-box {
+    flex: 1;
+    background: #1e2230;
+    padding: 10pt 14pt;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat-box:last-child { border-right: none; }
+  .stat-val { font-size: 18pt; font-weight: 700; color: #c9a96e; }
+  .stat-label { font-size: 7pt; color: #8b8a85; margin-top: 2pt; }
+</style>
+</head>
+<body>
+  <div class="section-label">EXECUTIVE SUMMARY</div>
+  <div class="page-title">项目概述：什么是 BizSim？</div>
+  <div class="gold-bar"></div>
+  <div class="main">
+    <div class="left">
+      <div class="card">
+        <div class="card-title">◎ 核心定位</div>
+        <div class="card-text">BizSim 是一个基于 <strong>大规模多 Agent 市场模拟</strong> 的创业验证平台。创业者输入产品描述，系统自动生成 <strong>数千个多角色 Agent</strong>，在虚拟市场环境中自由交互、博弈、涌现，在数分钟内完成一场完整的市场推演。</div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔑 核心价值</div>
+        <div class="card-text">在投入真金白银之前，先在数字沙盘里"发布"一次你的产品——看到的不是一个 AI 的建议，而是一个 <strong style="color: #7bafcf;">虚拟市场的真实反馈</strong>。生成包含采用曲线、情绪分布、转化漏斗、单位经济学等多维度的商业可行性分析报告。</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val">A$49</div><div class="stat-label">Standard 一次</div></div>
+        <div class="stat-box"><div class="stat-val">A$99</div><div class="stat-label">Deep Dive 一次</div></div>
+        <div class="stat-box"><div class="stat-val">72-78%</div><div class="stat-label">毛利率</div></div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="right-card">
+        <div class="right-title">⚔️ 与竞品的本质差异</div>
+        <div class="bar-group">
+          <div class="bar-label"><span>传统 AI 验证工具</span><span class="val">0 Agent</span></div>
+          <div class="bar-track"><div class="bar-fill bar-fill-low"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>固定 Agent 团队</span><span class="val">7-8 个</span></div>
+          <div class="bar-track"><div class="bar-fill bar-fill-mid"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span style="color: #e0ddd5; font-weight: 600;">BizSim（我们）</span><span class="val" style="color: #c9a96e;">数千个</span></div>
+          <div class="bar-track"><div class="bar-fill bar-fill-full"></div></div>
+        </div>
+        <div class="bar-highlight"><span class="check">●</span> 动态生成 · 自由博弈 · 口碑传播 · 竞品反应链</div>
+      </div>
+      <div class="target-box">
+        <div class="target-title">目标市场</div>
+        <div class="target-text">面向 <strong>澳洲市场</strong> 的独立开发者、CS 毕业生、创业课堂学生、Vibe Coder 等"产品做得快但不知道怎么验证"的群体。</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

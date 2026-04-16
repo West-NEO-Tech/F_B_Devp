@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; min-height: 405pt;
+    font-family: 'Inter', system-ui, 'Segoe UI', sans-serif;
+    background: #1a1e2e;
+    padding: 28pt 44pt;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .section-label { font-size: 9pt; color: #c9a96e; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; }
+  .page-title { font-size: 26pt; font-weight: 700; color: #e0ddd5; margin-top: 4pt; }
+  .gold-bar { width: 50pt; height: 3pt; background: #c9a96e; margin: 10pt 0 14pt 0; }
+  .main { display: flex; gap: 16pt; }
+  .left { flex: 1; display: flex; flex-direction: column; gap: 8pt; }
+  .right { width: 255pt; display: flex; flex-direction: column; gap: 8pt; }
+  .pricing-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(255,255,255,0.06);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .pricing-title { font-size: 11pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  .tier-row {
+    display: flex; align-items: center;
+    padding: 5pt 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 10pt;
+  }
+  .tier-row:last-child { border-bottom: none; }
+  .tier-name { width: 62pt; flex-shrink: 0; }
+  .tier-name .name { font-size: 9pt; font-weight: 700; color: #c9a96e; }
+  .tier-name .price { font-size: 7pt; color: #8b8a85; }
+  .tier-desc { flex: 1; font-size: 7.5pt; color: #8b8a85; }
+  .tier-target { font-size: 7.5pt; color: #8b8a85; text-align: right; width: 60pt; flex-shrink: 0; }
+  .unit-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(201,169,110,0.3);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .unit-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  .unit-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5pt 8pt;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 8pt;
+  }
+  .unit-row:last-child { border-bottom: none; }
+  .unit-label { color: #8b8a85; }
+  .unit-sub { font-size: 7pt; color: #666; }
+  .unit-val { font-weight: 700; }
+  .unit-val.gold { color: #c9a96e; }
+  .unit-val.normal { color: #e0ddd5; }
+  .breakeven-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6pt 8pt;
+    font-size: 8pt;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin-top: 4pt;
+  }
+  .breakeven-label { color: #8b8a85; }
+  .breakeven-val { font-size: 14pt; font-weight: 700; color: #c9a96e; }
+  .cost-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(107,143,173,0.3);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .cost-title { font-size: 9pt; font-weight: 700; color: #e0ddd5; margin-bottom: 6pt; }
+  .cost-item { font-size: 8pt; color: #8b8a85; line-height: 1.8; }
+  .cost-check { color: #c9a96e; margin-right: 4pt; }
+  .growth-card {
+    background: #252a3a;
+    border-left: 3px solid rgba(255,255,255,0.06);
+    padding: 10pt 14pt;
+    border-radius: 2pt;
+  }
+  .growth-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 8pt; }
+  .phases { display: flex; gap: 8pt; }
+  .phase {
+    flex: 1;
+    background: #1e2230;
+    padding: 8pt 10pt;
+    border-radius: 2pt;
+  }
+  .phase-header { display: flex; align-items: center; gap: 5pt; margin-bottom: 6pt; }
+  .phase-badge {
+    font-size: 7pt; font-weight: 700; color: #fff;
+    background: #6b8fad;
+    padding: 2pt 5pt;
+    border-radius: 2pt;
+  }
+  .phase-badge.p1 { background: #6b8fad; }
+  .phase-badge.p2 { background: #b49a64; }
+  .phase-time { font-size: 8pt; color: #e0ddd5; font-weight: 500; }
+  .phase-item { font-size: 7pt; color: #8b8a85; line-height: 1.7; }
+</style>
+</head>
+<body>
+  <div class="section-label">BUSINESS MODEL</div>
+  <div class="page-title">Business Model: Dual-Engine High-Margin Structure</div>
+  <div class="gold-bar"></div>
+  <div class="main">
+    <div class="left">
+      <div class="pricing-card">
+        <div class="pricing-title">💰 Revenue Tiers</div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Free</div><div class="price">A$0</div></div>
+          <div class="tier-desc">1 Quick Scan/month (20 agents, 10 rounds)</div>
+          <div class="tier-target">Trial entry</div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Standard</div><div class="price">A$49/use</div></div>
+          <div class="tier-desc">300–500 agents, 30 rounds simulation</div>
+          <div class="tier-target">Casual validation</div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Deep Dive</div><div class="price">A$99/use</div></div>
+          <div class="tier-desc">1000+ agents, 50 rounds + framework + PDF</div>
+          <div class="tier-target">Serious validation</div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Custom</div><div class="price">Custom</div></div>
+          <div class="tier-desc">1000+ agents + unlimited chat + custom analysis</div>
+          <div class="tier-target">Enterprise / Serial founders</div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Education</div><div class="price">Custom</div></div>
+          <div class="tier-desc">Bulk accounts + admin dashboard + semester license</div>
+          <div class="tier-target">University courses</div>
+        </div>
+        <div class="tier-row">
+          <div class="tier-name"><div class="name">Workshops</div><div class="price">A$500-2K</div></div>
+          <div class="tier-desc">Vibe Coding / AI Application / Validation bootcamp</div>
+          <div class="tier-target">Unis / Accelerators</div>
+        </div>
+      </div>
+      <div class="growth-card">
+        <div class="growth-title">📈 Growth Path</div>
+        <div class="phases">
+          <div class="phase">
+            <div class="phase-header"><span class="phase-badge">P0</span><span class="phase-time">0-3 months</span></div>
+            <div class="phase-item">• Free uni trials → 30-50 seed users</div>
+            <div class="phase-item">• 2-3 deep case studies</div>
+            <div class="phase-item">• Product Hunt launch</div>
+          </div>
+          <div class="phase">
+            <div class="phase-header"><span class="phase-badge p1">P1</span><span class="phase-time">3-6 months</span></div>
+            <div class="phase-item">• 200-500 registered users</div>
+            <div class="phase-item">• 50-100 paying users</div>
+            <div class="phase-item">• 3-5 university partnerships</div>
+          </div>
+          <div class="phase">
+            <div class="phase-header"><span class="phase-badge p2">P2</span><span class="phase-time">6-12 months</span></div>
+            <div class="phase-item">• MRR target: A$10K-30K</div>
+            <div class="phase-item">• University bulk licensing</div>
+            <div class="phase-item">• NZ / Singapore market test</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="right">
+      <div class="unit-card">
+        <div class="unit-title">💎 Unit Economics</div>
+        <div class="unit-row">
+          <div><span class="unit-label">Standard (300-500 Agent)</span><br><span class="unit-sub">AI Cost: A$10-15</span></div>
+          <div class="unit-val gold">Margin ~72%</div>
+        </div>
+        <div class="unit-row">
+          <div><span class="unit-label">Deep Dive (1000+ Agent)</span><br><span class="unit-sub">AI Cost: A$25-35</span></div>
+          <div class="unit-val gold">Margin ~65-70%</div>
+        </div>
+        <div class="unit-row">
+          <span class="unit-label">Workshop services</span>
+          <div class="unit-val gold">Margin ~82%</div>
+        </div>
+        <div class="breakeven-row">
+          <span class="breakeven-label">Break-even point</span>
+          <span class="breakeven-val">~60-80/mo</span>
+        </div>
+      </div>
+      <div class="cost-card">
+        <div class="cost-title">Cost Optimization</div>
+        <div class="cost-item"><span class="cost-check">✔</span> Tiered LLM dispatch</div>
+        <div class="cost-item"><span class="cost-check">✔</span> Smart caching & batching</div>
+        <div class="cost-item"><span class="cost-check">✔</span> Dynamic scale adjustment</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

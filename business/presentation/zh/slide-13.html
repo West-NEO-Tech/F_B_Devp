@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 720pt; min-height: 405pt;
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #1a1e2e;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    position: relative;
+  }
+  .mesh {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 500pt 300pt at 60% 50%, rgba(107,143,173,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 400pt 250pt at 30% 60%, rgba(107,143,173,0.04) 0%, transparent 70%);
+  }
+  svg.bg-mesh {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0.06;
+  }
+  .content { position: relative; z-index: 1; }
+  .badge {
+    display: inline-block;
+    font-size: 9pt; color: #c9a96e;
+    font-weight: 600; letter-spacing: 0.2em;
+    border: 1px solid rgba(201,169,110,0.35);
+    padding: 6pt 28pt;
+    border-radius: 2pt;
+    margin-bottom: 18pt;
+  }
+  .tagline {
+    font-size: 32pt; font-weight: 700;
+    color: #e0ddd5;
+    line-height: 1.35;
+    margin-bottom: 14pt;
+  }
+  .gold-bar {
+    width: 60pt; height: 3pt;
+    background: #c9a96e;
+    margin: 0 auto 14pt auto;
+  }
+  .subtitle {
+    font-size: 11pt; color: #8b8a85;
+    margin-bottom: 32pt;
+  }
+  .cards {
+    display: flex; gap: 14pt;
+    justify-content: center;
+    margin-bottom: 26pt;
+  }
+  .card {
+    width: 140pt;
+    background: #252a3a;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4pt;
+    padding: 16pt 12pt 14pt 12pt;
+    text-align: center;
+  }
+  .card:nth-child(2) {
+    border-color: rgba(201,169,110,0.2);
+  }
+  .card-icon { font-size: 20pt; margin-bottom: 6pt; }
+  .card-title { font-size: 10pt; font-weight: 700; color: #e0ddd5; margin-bottom: 3pt; }
+  .card-desc { font-size: 7.5pt; color: #8b8a85; }
+  .contact { font-size: 8.5pt; color: #8b8a85; }
+</style>
+</head>
+<body>
+  <svg class="bg-mesh" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+        <circle cx="20" cy="20" r="0.8" fill="#6b8fad"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+    <line x1="30%" y1="20%" x2="50%" y2="35%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="50%" y1="35%" x2="70%" y2="25%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="70%" y1="25%" x2="60%" y2="50%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="40%" y1="60%" x2="60%" y2="50%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="25%" y1="45%" x2="40%" y2="60%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="30%" y1="20%" x2="25%" y2="45%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="55%" y1="70%" x2="75%" y2="65%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="60%" y1="50%" x2="75%" y2="65%" stroke="#6b8fad" stroke-width="0.5"/>
+    <line x1="40%" y1="60%" x2="55%" y2="70%" stroke="#6b8fad" stroke-width="0.5"/>
+  </svg>
+  <div class="mesh"></div>
+  <div class="content">
+    <div class="badge">OUR  VISION</div>
+    <div class="tagline">让每一个创业想法<br>都能先在数字沙盘里验证一遍</div>
+    <div class="gold-bar"></div>
+    <div class="subtitle">BizSim — 降低试错成本，推动创业民主化</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">AI 驱动</div>
+        <div class="card-desc">数百 Agent 智能模拟</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌏</div>
+        <div class="card-title">澳洲市场</div>
+        <div class="card-desc">本地化先发优势</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <div class="card-title">高毛利模式</div>
+        <div class="card-desc">72-78% 毛利率</div>
+      </div>
+    </div>
+    <div class="contact">联系方式：jianxin.li@ecu.edu.au</div>
+  </div>
+</body>
+</html>
