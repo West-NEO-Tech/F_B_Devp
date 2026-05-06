@@ -1,4 +1,15 @@
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
+
+
+def _normalize_database_url(url: str) -> str:
+    if url.startswith("postgresql+asyncpg://"):
+        return url
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    return url
 
 
 class Settings(BaseSettings):
@@ -23,6 +34,12 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.7
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+
+    @model_validator(mode="after")
+    def normalize_env_urls(self):
+        # Render injects DATABASE_URL as postgres://...; SQLAlchemy async engine needs asyncpg.
+        self.database_url = _normalize_database_url(self.database_url)
+        return self
 
 
 settings = Settings()
