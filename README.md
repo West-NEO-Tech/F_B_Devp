@@ -44,6 +44,7 @@ BizSim/
 | 002 | API Integration | ✅ 前端 mock → 真实 API |
 | 003 | Project Wizard | ✅ 4 步创建引导 + AI 字段补全 + 项目详情 |
 | 004 | LLM Integration | ✅ AsyncOpenAI + LiteLLM（本地免费 / 生产 OpenRouter） |
+| 005 | API部署 |
 
 ---
 
