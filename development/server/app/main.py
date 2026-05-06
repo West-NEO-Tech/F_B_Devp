@@ -12,7 +12,7 @@ from app.config import settings
 from app.database import async_session_factory, engine
 from app.llm import LLMServiceError
 from app.middleware.logging import RequestLoggingMiddleware
-from app.routers import agent_templates, health, projects, runs, scenarios, seed_materials
+from app.routers import agent_templates, env_demo, health, projects, runs, scenarios, seed_materials
 
 
 def _setup_logging() -> None:
@@ -72,6 +72,7 @@ def create_app() -> FastAPI:
 
     # Register routers
     application.include_router(health.router)
+    application.include_router(env_demo.router)
     application.include_router(projects.router)
     application.include_router(scenarios.router)
     application.include_router(runs.router)
