@@ -6,8 +6,10 @@ if [ -d "$ROOT_DIR/development/server" ]; then
   cd "$ROOT_DIR/development/server"
 fi
 
+export PYTHONPATH="$(pwd):${PYTHONPATH:-}"
+
 if [ -f "alembic.ini" ]; then
-  if ! alembic -c alembic.ini upgrade head; then
+  if ! python -m alembic -c alembic.ini upgrade head; then
     echo "WARNING: alembic migration failed, continuing startup" >&2
   fi
 else

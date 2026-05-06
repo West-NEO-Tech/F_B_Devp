@@ -66,6 +66,10 @@ def create_app() -> FastAPI:
     )
     application.add_middleware(RequestLoggingMiddleware)
 
+    @application.get("/", include_in_schema=False)
+    async def root() -> dict[str, str]:
+        return {"status": "ok"}
+
     # Register routers
     application.include_router(health.router)
     application.include_router(projects.router)
