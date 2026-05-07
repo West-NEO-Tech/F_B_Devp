@@ -1,11 +1,6 @@
-# BizSim
+前端：React 18 + TypeScript + Vite + Tailwind + shadcn/ui
 
-## 项目简介
-
-BizSim 是一个多智能体商业验证模拟平台。
-
-- 前端：React 18 + TypeScript + Vite + Tailwind + shadcn/ui
-- 后端：FastAPI + async SQLAlchemy + PostgreSQL + LiteLLM
+后端：FastAPI + async SQLAlchemy + PostgreSQL + LiteLLM
 
 ## 部署与基础设施
 
