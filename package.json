@@ -1,0 +1,9 @@
+{
+  "name": "bizsim-root",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "pnpm --dir development run build",
+    "install:frontend": "pnpm --dir development install --frozen-lockfile"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd development && pnpm install",
-  "buildCommand": "cd development && pnpm run build",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm --dir development install --frozen-lockfile",
+  "buildCommand": "pnpm --dir development run build",
   "outputDirectory": "development/dist",
   "rewrites": [
     {
