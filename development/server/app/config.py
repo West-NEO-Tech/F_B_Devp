@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 2000
     llm_temperature: float = 0.7
 
+    # Skip seed/lifespan side effects in serverless (Vercel) deployments.
+    skip_seed: bool = False
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
     @model_validator(mode="after")

@@ -34,15 +34,19 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger("bizsim")
     logger.info("Starting BizSim API server")
 
-    # Seed data — tolerate missing database so the server can still start
-    try:
-        async with async_session_factory() as session:
-            from seed.agent_templates import seed_agent_templates
+    # Seed data — tolerate missing database so the server can still start.
+    # Skipped automatically in serverless (Vercel) — set SKIP_SEED=true to run alembic + seed manually.
+    if settings.skip_seed:
+        logger.info("Seed data skipped — SKIP_SEED=true")
+    else:
+        try:
+            async with async_session_factory() as session:
+                from seed.agent_templates import seed_agent_templates
 
-            await seed_agent_templates(session)
-            await session.commit()
-    except Exception as exc:
-        logger.warning("Seed data skipped — database not available: %s", exc)
+                await seed_agent_templates(session)
+                await session.commit()
+        except Exception as exc:
+            logger.warning("Seed data skipped — database not available: %s", exc)
 
     yield
     await engine.dispose()

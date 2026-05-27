@@ -2,7 +2,7 @@
 name = "bizsim-server"
 version = "0.1.0"
 description = "BizSim — Multi-Agent Business Validation Simulation Platform API"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.30.0",
@@ -32,7 +32,7 @@ filterwarnings = [
 ]
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
