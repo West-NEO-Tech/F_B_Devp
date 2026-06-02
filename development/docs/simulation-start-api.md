@@ -14,7 +14,7 @@ GET /api/runs/{run_id}/agents
 
 
 
-### 2 响应示例
+### 1.2 响应示例
 
 ```json
 {
