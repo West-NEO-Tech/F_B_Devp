@@ -13,7 +13,10 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: 30_000,
-      retry: 1,
+      retry: (failureCount, error) => {
+        if (failureCount >= 2) return false;
+        return error instanceof Error && error.message.startsWith("Server error");
+      },
     },
     mutations: {
       retry: false,

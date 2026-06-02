@@ -49,8 +49,10 @@ async def lifespan(app: FastAPI):
             logger.warning("Seed data skipped — database not available: %s", exc)
 
     yield
-    await engine.dispose()
-    logging.getLogger("bizsim").info("BizSim API server shut down")
+    # Vercel reuses warm instances; disposing the engine after each request breaks the next call.
+    if not settings.is_serverless:
+        await engine.dispose()
+        logging.getLogger("bizsim").info("BizSim API server shut down")
 
 
 def create_app() -> FastAPI:
@@ -108,6 +110,18 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=exc.status_code,
             content={"detail": exc.detail},
+        )
+
+    @application.exception_handler(Exception)
+    async def unhandled_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
+        logging.getLogger("bizsim").exception(
+            "Unhandled error on %s %s", request.method, request.url.path
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"},
         )
 
     return application

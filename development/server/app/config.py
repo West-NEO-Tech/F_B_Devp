@@ -1,3 +1,5 @@
+import os
+
 from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
@@ -38,10 +40,17 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
+    @property
+    def is_serverless(self) -> bool:
+        return bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
     @model_validator(mode="after")
     def normalize_env_urls(self):
         # Render injects DATABASE_URL as postgres://...; SQLAlchemy async engine needs asyncpg.
         self.database_url = _normalize_database_url(self.database_url)
+        # Vercel/Lambda: never run startup seed; lifespan must stay side-effect free.
+        if self.is_serverless:
+            self.skip_seed = True
         return self
 
 
