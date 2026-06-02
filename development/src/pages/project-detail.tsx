@@ -127,8 +127,14 @@ export default function ProjectDetailPage() {
             onSuccess: () => {
               toast({ title: "Seed materials generated" });
             },
-            onError: () => {
-              toast({ title: "Generation failed", variant: "destructive" });
+            onError: (err) => {
+              const message =
+                err instanceof Error ? err.message : "Generation failed";
+              toast({
+                title: "Generation failed",
+                description: message,
+                variant: "destructive",
+              });
             },
           });
         },

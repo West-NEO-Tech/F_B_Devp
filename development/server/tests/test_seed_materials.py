@@ -1,9 +1,10 @@
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
-import openai
 import pytest
 from httpx import AsyncClient
+
+from app.llm import LLMTimeoutError
 
 MOCK_LLM_RESPONSE = {
     "market_context": {
@@ -35,20 +36,11 @@ MOCK_LLM_RESPONSE = {
 }
 
 
-def _mock_llm_client() -> MagicMock:
-    """Return a mock AsyncOpenAI client that yields MOCK_LLM_RESPONSE."""
-    message = MagicMock()
-    message.content = json.dumps(MOCK_LLM_RESPONSE)
-
-    choice = MagicMock()
-    choice.message = message
-
-    response = MagicMock()
-    response.choices = [choice]
-
-    client = MagicMock()
-    client.chat.completions.create = AsyncMock(return_value=response)
-    return client
+def _patch_chat_completion(**kwargs):
+    """Patch chat_completion used by seed_builder_service."""
+    if "side_effect" not in kwargs and "return_value" not in kwargs:
+        kwargs["return_value"] = json.dumps(MOCK_LLM_RESPONSE)
+    return patch("app.services.seed_builder_service.chat_completion", AsyncMock(**kwargs))
 
 
 async def _create_project_and_scenario(client: AsyncClient) -> tuple[str, str]:
@@ -70,10 +62,7 @@ async def _create_project_and_scenario(client: AsyncClient) -> tuple[str, str]:
 async def test_generate_seed_materials(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=_mock_llm_client(),
-    ):
+    with _patch_chat_completion():
         resp = await client.post(
             f"/api/scenarios/{scenario_id}/seed-materials"
         )
@@ -95,10 +84,7 @@ async def test_generate_seed_materials(client: AsyncClient):
 async def test_generate_seed_materials_increments_version(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=_mock_llm_client(),
-    ):
+    with _patch_chat_completion():
         resp1 = await client.post(
             f"/api/scenarios/{scenario_id}/seed-materials"
         )
@@ -116,10 +102,7 @@ async def test_generate_seed_materials_increments_version(client: AsyncClient):
 async def test_list_seed_materials(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=_mock_llm_client(),
-    ):
+    with _patch_chat_completion():
         await client.post(f"/api/scenarios/{scenario_id}/seed-materials")
 
     resp = await client.get(f"/api/scenarios/{scenario_id}/seed-materials")
@@ -134,10 +117,7 @@ async def test_list_seed_materials(client: AsyncClient):
 async def test_get_seed_material_by_id(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=_mock_llm_client(),
-    ):
+    with _patch_chat_completion():
         create_resp = await client.post(
             f"/api/scenarios/{scenario_id}/seed-materials"
         )
@@ -155,10 +135,7 @@ async def test_get_seed_material_by_id(client: AsyncClient):
 async def test_update_seed_material_competitors(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=_mock_llm_client(),
-    ):
+    with _patch_chat_completion():
         create_resp = await client.post(
             f"/api/scenarios/{scenario_id}/seed-materials"
         )
@@ -188,15 +165,7 @@ async def test_update_seed_material_competitors(client: AsyncClient):
 async def test_generate_seed_materials_llm_failure(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
 
-    mock_client = MagicMock()
-    mock_client.chat.completions.create = AsyncMock(
-        side_effect=openai.APITimeoutError(request=MagicMock())
-    )
-
-    with patch(
-        "app.services.seed_builder_service.get_llm_client",
-        return_value=mock_client,
-    ):
+    with _patch_chat_completion(side_effect=LLMTimeoutError()):
         resp = await client.post(
             f"/api/scenarios/{scenario_id}/seed-materials"
         )

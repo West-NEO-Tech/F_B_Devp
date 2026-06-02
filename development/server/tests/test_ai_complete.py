@@ -2,9 +2,10 @@ import json
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import openai
 import pytest
 from httpx import AsyncClient
+
+from app.llm import LLMServiceError, LLMTimeoutError
 
 # Valid JSON that the mock LLM returns for a full completion
 _MOCK_LLM_JSON = json.dumps({
@@ -16,32 +17,18 @@ _MOCK_LLM_JSON = json.dumps({
 })
 
 
-def _make_mock_response(content: str = _MOCK_LLM_JSON) -> MagicMock:
-    """Create a mock ChatCompletion response object."""
-    choice = MagicMock()
-    choice.message.content = content
-    response = MagicMock()
-    response.choices = [choice]
-    return response
-
-
-def _patch_llm(mock_response=None, side_effect=None):
-    """Patch get_llm_client to return a mock AsyncOpenAI client.
-
-    Usage:
-        with _patch_llm() as mock_create:
-            ...  # mock_create is the patched get_llm_client mock
-    """
-    if mock_response is None and side_effect is None:
-        mock_response = _make_mock_response()
-
-    mock_client = MagicMock()
-    mock_create = AsyncMock(return_value=mock_response, side_effect=side_effect)
-    mock_client.chat.completions.create = mock_create
-
+def _patch_llm(content: str | None = None, side_effect=None):
+    """Patch chat_completion used by ai_complete_service."""
+    if side_effect is None:
+        if content is None:
+            content = _MOCK_LLM_JSON
+        return patch(
+            "app.services.ai_complete_service.chat_completion",
+            AsyncMock(return_value=content),
+        )
     return patch(
-        "app.services.ai_complete_service.get_llm_client",
-        return_value=mock_client,
+        "app.services.ai_complete_service.chat_completion",
+        AsyncMock(side_effect=side_effect),
     )
 
 
@@ -95,7 +82,7 @@ async def test_ai_complete_skips_filled_fields(client: AsyncClient):
         "competitors": ["App A", "App B"],
     })
 
-    with _patch_llm(mock_response=_make_mock_response(partial_json)):
+    with _patch_llm(content=partial_json):
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 200
@@ -170,8 +157,7 @@ async def test_ai_complete_llm_unavailable(client: AsyncClient):
     assert resp.status_code == 201
     project_id = resp.json()["id"]
 
-    error = openai.APIConnectionError(request=MagicMock())
-    with _patch_llm(side_effect=error):
+    with _patch_llm(side_effect=LLMServiceError("LLM service unavailable")):
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 502
@@ -188,8 +174,7 @@ async def test_ai_complete_llm_timeout(client: AsyncClient):
     assert resp.status_code == 201
     project_id = resp.json()["id"]
 
-    error = openai.APITimeoutError(request=MagicMock())
-    with _patch_llm(side_effect=error):
+    with _patch_llm(side_effect=LLMTimeoutError()):
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 504
@@ -206,7 +191,7 @@ async def test_ai_complete_llm_bad_json(client: AsyncClient):
     assert resp.status_code == 201
     project_id = resp.json()["id"]
 
-    with _patch_llm(mock_response=_make_mock_response("This is not JSON at all")):
+    with _patch_llm(content="This is not JSON at all"):
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 502
@@ -244,7 +229,7 @@ async def test_ai_complete_partial_llm_response(client: AsyncClient):
         "target_market": "Enterprise customers.",
     })
 
-    with _patch_llm(mock_response=_make_mock_response(partial)):
+    with _patch_llm(content=partial):
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 200
@@ -278,13 +263,12 @@ async def test_ai_complete_prompt_includes_context(client: AsyncClient):
     assert resp.status_code == 201
     project_id = resp.json()["id"]
 
-    with _patch_llm() as mock_get:
+    with _patch_llm() as mock_chat:
         resp = await client.post(f"/api/projects/{project_id}/ai-complete")
 
     assert resp.status_code == 200
 
-    mock_client = mock_get.return_value
-    call_args = mock_client.chat.completions.create.call_args
+    call_args = mock_chat.call_args
     messages = call_args.kwargs["messages"]
 
     assert messages[0]["role"] == "system"

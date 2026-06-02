@@ -2,15 +2,17 @@ import json
 import logging
 import uuid
 
-import openai
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.llm import (
+    LLMNotConfiguredError,
+    LLMServiceError,
+    LLMTimeoutError,
     SEED_BUILDER_SYSTEM_PROMPT,
     build_seed_builder_prompt,
-    get_llm_client,
+    chat_completion,
 )
 from app.models.project import Project
 from app.models.scenario import SimulationScenario
@@ -61,32 +63,30 @@ async def generate_seed_materials(
     )
 
     try:
-        client = get_llm_client()
-        response = await client.chat.completions.create(
-            model=settings.llm_model,
+        content = await chat_completion(
             messages=[
                 {"role": "system", "content": SEED_BUILDER_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-            max_tokens=settings.llm_max_tokens,
-            temperature=settings.llm_temperature,
+            json_mode=True,
         )
-    except openai.APITimeoutError as exc:
-        logger.error("Seed builder LLM timed out: %s", exc)
+    except LLMNotConfiguredError:
+        seed.status = "failed"
+        seed.error_message = "LLM service not configured"
+        return seed
+    except LLMTimeoutError:
         seed.status = "failed"
         seed.error_message = "LLM request timed out"
         return seed
-    except (openai.APIConnectionError, openai.APIStatusError) as exc:
+    except LLMServiceError as exc:
         logger.error("Seed builder LLM error: %s", exc)
         seed.status = "failed"
-        seed.error_message = f"LLM error: {exc}"
+        seed.error_message = str(exc.detail) if hasattr(exc, "detail") else str(exc)
         return seed
-
-    content = response.choices[0].message.content
-    if not content:
+    except Exception as exc:
+        logger.exception("Seed builder unexpected error")
         seed.status = "failed"
-        seed.error_message = "LLM returned empty response"
+        seed.error_message = f"Generation error: {exc}"
         return seed
 
     try:

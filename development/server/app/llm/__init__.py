@@ -1,3 +1,4 @@
+from app.llm.chat import chat_completion
 from app.llm.client import (
     LLMNotConfiguredError,
     LLMResponseError,
@@ -14,6 +15,7 @@ from app.llm.prompts import (
 )
 
 __all__ = [
+    "chat_completion",
     "LLMServiceError",
     "LLMNotConfiguredError",
     "LLMTimeoutError",

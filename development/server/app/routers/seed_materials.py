@@ -1,9 +1,13 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database import get_session
+from app.models.project import Project
+from app.models.scenario import SimulationScenario
 from app.schemas.seed_material import SeedMaterialRead, SeedMaterialUpdate
 from app.services import scenario_service, seed_builder_service
 
@@ -19,12 +23,19 @@ async def generate_seed_materials(
     scenario_id: uuid.UUID,
     session: AsyncSession = Depends(get_session),
 ) -> SeedMaterialRead:
-    scenario = await scenario_service.get_scenario(session, scenario_id)
-    # Load the project via relationship
-    await session.refresh(scenario, ["project"])
-    seed = await seed_builder_service.generate_seed_materials(
-        session, scenario, scenario.project
+    result = await session.execute(
+        select(SimulationScenario)
+        .options(selectinload(SimulationScenario.project))
+        .where(
+            SimulationScenario.id == scenario_id,
+            SimulationScenario.deleted_at.is_(None),
+        )
     )
+    scenario = result.scalar_one_or_none()
+    if not scenario:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    project: Project = scenario.project
+    seed = await seed_builder_service.generate_seed_materials(session, scenario, project)
     await session.commit()
     return SeedMaterialRead.model_validate(seed, from_attributes=True)
 

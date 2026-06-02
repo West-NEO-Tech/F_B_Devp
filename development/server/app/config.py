@@ -48,9 +48,17 @@ class Settings(BaseSettings):
     def normalize_env_urls(self):
         # Render injects DATABASE_URL as postgres://...; SQLAlchemy async engine needs asyncpg.
         self.database_url = _normalize_database_url(self.database_url)
-        # Vercel/Lambda: never run startup seed; lifespan must stay side-effect free.
+        if self.llm_base_url:
+            url = self.llm_base_url.strip().rstrip("/")
+            # OpenAI-compatible APIs expect /v1 (OpenRouter, VectorEngine, LiteLLM, etc.)
+            if not url.endswith("/v1"):
+                url = f"{url}/v1"
+            self.llm_base_url = url
+        # Vercel/Lambda: shorter timeout + no startup seed.
         if self.is_serverless:
             self.skip_seed = True
+            if self.llm_timeout > 55:
+                self.llm_timeout = 55
         return self
 
 

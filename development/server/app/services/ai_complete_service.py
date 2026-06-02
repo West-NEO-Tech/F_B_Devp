@@ -1,8 +1,6 @@
 import json
 import logging
 
-import openai
-
 from app.config import settings
 from app.llm import (
     SYSTEM_PROMPT,
@@ -10,7 +8,7 @@ from app.llm import (
     LLMServiceError,
     LLMTimeoutError,
     build_ai_complete_prompt,
-    get_llm_client,
+    chat_completion,
 )
 from app.models.project import Project
 from app.schemas.ai_complete import (
@@ -130,29 +128,22 @@ async def generate_completions(project: Project) -> AICompleteResponse:
 
     # 4. Call LLM
     try:
-        client = get_llm_client()
-        response = await client.chat.completions.create(
-            model=settings.llm_model,
+        content = await chat_completion(
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ],
-            response_format={"type": "json_object"},
-            max_tokens=settings.llm_max_tokens,
-            temperature=settings.llm_temperature,
+            json_mode=True,
         )
-    except openai.APITimeoutError as exc:
-        logger.error("LLM request timed out: %s", exc)
-        raise LLMTimeoutError() from exc
-    except openai.APIConnectionError as exc:
-        logger.error("LLM connection failed: %s", exc)
+    except LLMTimeoutError:
+        raise
+    except LLMServiceError:
+        raise
+    except Exception as exc:
+        logger.exception("AI complete unexpected error")
         raise LLMServiceError("LLM service unavailable") from exc
-    except openai.APIStatusError as exc:
-        logger.error("LLM API error %s: %s", exc.status_code, exc.message)
-        raise LLMServiceError(f"LLM error: {exc.status_code}") from exc
 
     # 5. Parse JSON response
-    content = response.choices[0].message.content
     if not content:
         raise LLMResponseError()
     try:
