@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { marketQABaseDescription, type MarketQAQuestion } from "@/hooks/use-market-qa";
+import {
+  formatMarketQASupplement,
+  marketQABaseDescription,
+  type MarketQAQuestion,
+} from "@/hooks/use-market-qa";
 
 interface StepMarketInfoProps {
   description: string;
@@ -14,16 +18,6 @@ interface StepMarketInfoProps {
   targetCount: number;
   isGenerating: boolean;
   onFinish: () => void;
-}
-
-function formatSupplement(qa: { q: string; a: string }[]): string {
-  const lines = ["", "### Market Info (Q&A)", ""];
-  for (const item of qa) {
-    lines.push(`- Q: ${item.q}`);
-    lines.push(`  A: ${item.a}`);
-    lines.push("");
-  }
-  return lines.join("\n").trimEnd();
 }
 
 export function StepMarketInfo({
@@ -63,10 +57,13 @@ export function StepMarketInfo({
 
   function syncToDescription(nextAnswers: Record<string, string>) {
     const pairs = questions
-      .map((q) => ({ q: q.question, a: (nextAnswers[q.id] ?? "").trim() }))
-      .filter((x) => x.a.length > 0);
+      .map((q) => ({
+        question: q.question,
+        answer: (nextAnswers[q.id] ?? "").trim(),
+      }))
+      .filter((x) => x.answer.length > 0);
     if (pairs.length === 0) return;
-    const supplement = formatSupplement(pairs);
+    const supplement = formatMarketQASupplement(pairs);
     const next = description.includes("### Market Info (Q&A)")
       ? description.replace(/### Market Info \(Q&A\)[\s\S]*$/m, supplement.trimStart())
       : `${description.trimEnd()}\n${supplement}\n`;

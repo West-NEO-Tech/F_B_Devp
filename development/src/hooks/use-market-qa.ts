@@ -18,6 +18,30 @@ export interface MarketQAEntry {
 }
 
 /** Parse Q&A block appended during the Market Info wizard step. */
+/** Serialize Market Info Q&A answers into the description appendix block. */
+export function formatMarketQASupplement(entries: MarketQAEntry[]): string {
+  if (entries.length === 0) return "";
+  const lines = ["", MARKET_QA_MARKER, ""];
+  for (const { question, answer } of entries) {
+    if (!question.trim() || !answer.trim()) continue;
+    lines.push(`- Q: ${question}`);
+    lines.push(`  A: ${answer.trim()}`);
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
+}
+
+/** Combine base description with optional Market Info Q&A block. */
+export function buildProjectDescription(
+  baseDescription: string,
+  qaEntries: MarketQAEntry[]
+): string {
+  const base = baseDescription.trim();
+  const supplement = formatMarketQASupplement(qaEntries);
+  if (!supplement) return base;
+  return base ? `${base}\n${supplement}\n` : `${supplement}\n`;
+}
+
 export function parseMarketQAFromDescription(description: string): MarketQAEntry[] {
   const idx = description.indexOf(MARKET_QA_MARKER);
   if (idx < 0) return [];

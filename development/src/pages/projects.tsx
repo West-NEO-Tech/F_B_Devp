@@ -9,7 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, FolderKanban, Calendar, Target } from "lucide-react";
+import { marketQABaseDescription } from "@/hooks/use-market-qa";
 import type { PaginatedProjects } from "@/types/api";
+
+function projectCardDescription(description: string | null | undefined): string {
+  const base = marketQABaseDescription(description ?? "").trim();
+  return base || "No description provided";
+}
 
 // Demo sample projects — shown when no real projects exist yet
 const DEMO_PROJECTS = [
@@ -170,7 +176,7 @@ export default function ProjectsPage() {
                   <StatusBadge status={project.status} />
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                  {project.description || "No description provided"}
+                  {projectCardDescription(project.description)}
                 </p>
                 <div className="flex items-center gap-3 flex-wrap">
                   {project.productType && (
