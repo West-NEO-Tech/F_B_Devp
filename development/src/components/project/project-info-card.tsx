@@ -167,30 +167,30 @@ export function ProjectInfoCard({
 
         <Separator />
 
-        {/* Timestamps */}
-        <div className="flex gap-6">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground font-medium">Created</span>
+        {/* Timestamps + next step */}
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex gap-6">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground font-medium">Created</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 ml-5">
+                {new Date(project.createdAt).toLocaleString()}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 ml-5">
-              {new Date(project.createdAt).toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground font-medium">Last updated</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground font-medium">Last updated</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 ml-5">
+                {new Date(project.updatedAt).toLocaleString()}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 ml-5">
-              {new Date(project.updatedAt).toLocaleString()}
-            </p>
           </div>
-        </div>
 
-        {onContinueToSimConfig && (
-          <div className="flex justify-end pt-2">
+          {onContinueToSimConfig && (
             <Button
               size="sm"
               onClick={onContinueToSimConfig}
@@ -204,8 +204,8 @@ export function ProjectInfoCard({
               <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
               Sim Config
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );
