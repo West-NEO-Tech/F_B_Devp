@@ -5,7 +5,6 @@ import uuid
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.llm import (
     LLMNotConfiguredError,
     LLMServiceError,
@@ -13,13 +12,36 @@ from app.llm import (
     SEED_BUILDER_SYSTEM_PROMPT,
     build_seed_builder_prompt,
     chat_completion,
+    seed_builder_max_tokens,
 )
 from app.models.project import Project
 from app.models.scenario import SimulationScenario
 from app.models.seed_material import SeedMaterial
 from app.schemas.seed_material import SeedMaterialUpdate
+from app.services.market_qa_parse import base_description, parse_additional_information
 
 logger = logging.getLogger(__name__)
+
+_MAX_CORE_DESCRIPTION_CHARS = 2500
+_MAX_QA_ENTRIES = 5
+_MAX_QA_ANSWER_CHARS = 350
+
+
+def _project_context_for_seed(project: Project) -> str:
+    full = project.description or ""
+    parts: list[str] = []
+    core = base_description(full)
+    if core:
+        parts.append(core[:_MAX_CORE_DESCRIPTION_CHARS])
+    qa = parse_additional_information(full)
+    if qa:
+        lines = ["Market research Q&A:"]
+        for entry in qa[:_MAX_QA_ENTRIES]:
+            q = entry["question"][:200]
+            a = entry["answer"][:_MAX_QA_ANSWER_CHARS]
+            lines.append(f"- Q: {q}\n  A: {a}")
+        parts.append("\n".join(lines))
+    return "\n\n".join(parts) if parts else ""
 
 
 async def _next_version(session: AsyncSession, scenario_id: uuid.UUID) -> int:
@@ -52,7 +74,7 @@ async def generate_seed_materials(
     agent_distribution = (scenario.market_config or {}).get("agent_distribution")
     prompt = build_seed_builder_prompt(
         project_name=project.name,
-        description=project.description,
+        description=_project_context_for_seed(project) or None,
         product_type=project.product_type,
         target_market=project.target_market,
         target_audience=project.target_audience,
@@ -69,6 +91,7 @@ async def generate_seed_materials(
                 {"role": "user", "content": prompt},
             ],
             json_mode=True,
+            max_tokens=seed_builder_max_tokens(scenario.agent_depth),
         )
     except LLMNotConfiguredError:
         seed.status = "failed"

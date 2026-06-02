@@ -1,4 +1,7 @@
 import uuid
+from typing import Literal
+
+from pydantic import Field
 
 from app.schemas.common import CamelModel, TimestampMixin
 
@@ -31,6 +34,14 @@ class DiscussionTopicSchema(CamelModel):
     relevance: str | None = None
 
 
+class SeedMaterialGenerate(CamelModel):
+    """Optional sim config applied atomically before generation (saves a round trip)."""
+
+    agent_depth: Literal["quick", "standard", "deep"] | None = None
+    agent_count: int | None = Field(default=None, gt=0)
+    market_config: dict | None = None
+
+
 class SeedMaterialRead(TimestampMixin):
     scenario_id: uuid.UUID
     version: int
@@ -44,4 +55,5 @@ class SeedMaterialRead(TimestampMixin):
 
 class SeedMaterialUpdate(CamelModel):
     competitors: list[dict] | None = None
+    consumer_personas: list[dict] | None = None
     discussion_topics: list[dict] | None = None

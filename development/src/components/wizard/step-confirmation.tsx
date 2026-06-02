@@ -1,58 +1,67 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Bot, ClipboardCheck, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  ReviewEntryList,
+  ReviewSectionCard,
+} from "@/components/project/project-review-display";
+import {
+  buildAdditionalEntriesFromDescription,
+  buildProjectOverviewEntries,
+} from "@/lib/project-review-entries";
 
 interface StepConfirmationProps {
   project: {
     name: string;
     description: string;
     productType: string;
-    targetMarket: string;
-    targetAudience: string;
-    pricingModel: string;
-    competitors: string[];
   };
 }
 
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-sm font-medium text-foreground">{label}</p>
-      {value ? (
-        <p className="text-sm text-foreground">{value}</p>
-      ) : (
-        <p className="text-sm text-muted-foreground">Not specified</p>
-      )}
-    </div>
-  );
-}
-
 export function StepConfirmation({ project }: StepConfirmationProps) {
+  const overviewEntries = buildProjectOverviewEntries(project);
+  const additionalEntries = buildAdditionalEntriesFromDescription(project.description);
+
   return (
     <div className="space-y-6">
-      <Card className="shadow-sm">
-        <CardContent className="p-6 space-y-5">
-          <Field label="Project Name" value={project.name} />
-          <Field label="Description" value={project.description} />
-          <Field label="Product Type" value={project.productType} />
-          <Field label="Target Market" value={project.targetMarket} />
-          <Field label="Target Audience" value={project.targetAudience} />
-          <Field label="Pricing Model" value={project.pricingModel} />
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Competitors</p>
-            {project.competitors.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {project.competitors.map((c) => (
-                  <Badge key={c} variant="secondary">{c}</Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Not specified</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-      <p className="text-sm text-muted-foreground text-center">
-        Click &ldquo;Create Project&rdquo; to finalize and activate your project.
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-foreground">
+          <ClipboardCheck className="h-4 w-4 text-primary" />
+          <h3 className="text-base font-medium">Review & confirm</h3>
+        </div>
+        <p className="text-xs text-muted-foreground pl-6">
+          Check your project details before creating.
+        </p>
+      </div>
+
+      <ReviewSectionCard
+        icon={FileText}
+        title="Project overview"
+        description="Basic details from earlier steps"
+      >
+        <ReviewEntryList entries={overviewEntries} />
+      </ReviewSectionCard>
+
+      <ReviewSectionCard
+        icon={Bot}
+        title="Additional information"
+        description="Answers from the Market Info step"
+        badge={
+          additionalEntries.length > 0 ? (
+            <Badge variant="outline" className="shrink-0 text-xs font-normal">
+              {additionalEntries.length}{" "}
+              {additionalEntries.length === 1 ? "answer" : "answers"}
+            </Badge>
+          ) : undefined
+        }
+        isEmpty={additionalEntries.length === 0}
+        emptyMessage="No additional answers were provided."
+      >
+        <ReviewEntryList entries={additionalEntries} />
+      </ReviewSectionCard>
+
+      <p className="text-xs text-muted-foreground text-center px-2">
+        Click <span className="font-medium text-foreground">Create Project</span> below to
+        finalize and activate your project.
       </p>
     </div>
   );

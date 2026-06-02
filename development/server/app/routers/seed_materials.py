@@ -8,7 +8,12 @@ from sqlalchemy.orm import selectinload
 from app.database import get_session
 from app.models.project import Project
 from app.models.scenario import SimulationScenario
-from app.schemas.seed_material import SeedMaterialRead, SeedMaterialUpdate
+from app.schemas.scenario import ScenarioUpdate
+from app.schemas.seed_material import (
+    SeedMaterialGenerate,
+    SeedMaterialRead,
+    SeedMaterialUpdate,
+)
 from app.services import scenario_service, seed_builder_service
 
 router = APIRouter(tags=["seed-materials"])
@@ -21,6 +26,7 @@ router = APIRouter(tags=["seed-materials"])
 )
 async def generate_seed_materials(
     scenario_id: uuid.UUID,
+    body: SeedMaterialGenerate | None = None,
     session: AsyncSession = Depends(get_session),
 ) -> SeedMaterialRead:
     result = await session.execute(
@@ -34,6 +40,12 @@ async def generate_seed_materials(
     scenario = result.scalar_one_or_none()
     if not scenario:
         raise HTTPException(status_code=404, detail="Scenario not found")
+    if body is not None:
+        update_data = body.model_dump(exclude_unset=True)
+        if update_data:
+            scenario = await scenario_service.update_scenario(
+                session, scenario_id, ScenarioUpdate(**update_data)
+            )
     project: Project = scenario.project
     seed = await seed_builder_service.generate_seed_materials(session, scenario, project)
     await session.commit()

@@ -12,7 +12,17 @@ from app.config import settings
 from app.database import async_session_factory, engine
 from app.llm import LLMServiceError
 from app.middleware.logging import RequestLoggingMiddleware
-from app.routers import agent_templates, env_demo, health, projects, runs, scenarios, seed_materials
+from app.routers import (
+    agent_templates,
+    env_demo,
+    health,
+    market_qa,
+    projects,
+    runs,
+    scenarios,
+    seed_materials,
+    simulation,
+)
 
 
 def _setup_logging() -> None:
@@ -84,6 +94,8 @@ def create_app() -> FastAPI:
     application.include_router(runs.router)
     application.include_router(agent_templates.router)
     application.include_router(seed_materials.router)
+    application.include_router(simulation.router)
+    application.include_router(market_qa.router)
 
     @application.exception_handler(RequestValidationError)
     async def validation_exception_handler(

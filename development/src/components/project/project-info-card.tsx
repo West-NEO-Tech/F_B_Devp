@@ -1,25 +1,46 @@
+import { useState } from "react";
 import {
   Pencil,
-  Target,
-  Users,
-  DollarSign,
   Calendar,
   Check,
   ChevronDown,
-  Briefcase,
-  Globe,
   ArrowRight,
+  FileText,
+  Bot,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { StatusBadge } from "@/components/status-badge";
+import {
+  ReviewEntryList,
+  ReviewSectionCard,
+  productTypeReviewBody,
+} from "@/components/project/project-review-display";
+import {
+  buildProjectAdditionalEntries,
+  buildProjectOverviewEntries,
+} from "@/lib/project-review-entries";
 import type { ProjectRead } from "@/types/api";
 
 interface ProjectInfoCardProps {
   project: ProjectRead;
   onEdit: () => void;
+  onDelete: () => void;
+  isDeleting?: boolean;
   onContinueToSimConfig?: () => void;
   canContinueToSimConfig?: boolean;
   collapsed?: boolean;
@@ -29,11 +50,17 @@ interface ProjectInfoCardProps {
 export function ProjectInfoCard({
   project,
   onEdit,
+  onDelete,
+  isDeleting = false,
   onContinueToSimConfig,
   canContinueToSimConfig = true,
   collapsed,
   onToggleCollapse,
 }: ProjectInfoCardProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const overviewEntries = buildProjectOverviewEntries(project);
+  const additionalEntries = buildProjectAdditionalEntries(project);
+
   if (collapsed) {
     return (
       <Card>
@@ -48,30 +75,15 @@ export function ProjectInfoCard({
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {project.productType && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Briefcase className="h-3.5 w-3.5 opacity-50" />
-                <span className="font-medium text-foreground">{project.productType}</span>
-              </div>
-            )}
-            {project.targetMarket && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Globe className="h-3.5 w-3.5 opacity-50" />
-                <span className="font-medium text-foreground">{project.targetMarket}</span>
-              </div>
-            )}
-            {project.targetAudience && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Users className="h-3.5 w-3.5 opacity-50" />
-                <span className="font-medium text-foreground">{project.targetAudience}</span>
-              </div>
-            )}
-            {project.pricingModel && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <DollarSign className="h-3.5 w-3.5 opacity-50" />
-                <span className="font-medium text-foreground">{project.pricingModel}</span>
-              </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {project.productType ? (
+              <div className="text-sm">{productTypeReviewBody(project.productType)}</div>
+            ) : null}
+            {additionalEntries.length > 0 && (
+              <Badge variant="outline" className="text-xs font-normal">
+                {additionalEntries.length}{" "}
+                {additionalEntries.length === 1 ? "answer" : "answers"}
+              </Badge>
             )}
           </div>
         </CardContent>
@@ -86,88 +98,78 @@ export function ProjectInfoCard({
           <h2 className="text-xl font-semibold text-foreground">{project.name}</h2>
           <StatusBadge status={project.status} />
         </div>
-        <Button variant="outline" size="sm" onClick={onEdit}>
-          <Pencil className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
+        <div className="flex flex-wrap gap-2 shrink-0">
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete project?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently remove <span className="font-medium">{project.name}</span>{" "}
+                  and all related scenarios, seed materials, and simulation runs. This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  disabled={isDeleting}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onDelete();
+                  }}
+                >
+                  {isDeleting ? "Deleting…" : "Delete project"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button variant="outline" size="sm" onClick={onEdit} disabled={isDeleting}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Overview */}
-        <div className="space-y-3">
-          <div>
-            <span className="text-sm text-muted-foreground font-medium">Description</span>
-            <p className="text-sm text-foreground mt-1">
-              {project.description || <span className="text-muted-foreground">Not specified</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">Product Type</span>
-          </div>
-          <p className="text-sm text-foreground ml-6">
-            {project.productType || <span className="text-muted-foreground">Not specified</span>}
-          </p>
-        </div>
+      <CardContent className="space-y-4">
+        <ReviewSectionCard
+          icon={FileText}
+          title="Project overview"
+          description="Basic project details"
+        >
+          <ReviewEntryList entries={overviewEntries} />
+        </ReviewSectionCard>
+
+        <ReviewSectionCard
+          icon={Bot}
+          title="Additional information"
+          description="Market Info Q&A and supplemental details"
+          badge={
+            additionalEntries.length > 0 ? (
+              <Badge variant="outline" className="shrink-0 text-xs font-normal">
+                {additionalEntries.length}{" "}
+                {additionalEntries.length === 1 ? "answer" : "answers"}
+              </Badge>
+            ) : undefined
+          }
+          isEmpty={additionalEntries.length === 0}
+          emptyMessage="No additional information provided."
+        >
+          <ReviewEntryList entries={additionalEntries} />
+        </ReviewSectionCard>
 
         <Separator />
 
-        {/* Market Information */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-foreground">Market Information</h3>
-
-          <div className="grid gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">Target Market</span>
-              </div>
-              <p className="text-sm text-foreground mt-1 ml-6">
-                {project.targetMarket || <span className="text-muted-foreground">Not specified</span>}
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">Target Audience</span>
-              </div>
-              <p className="text-sm text-foreground mt-1 ml-6">
-                {project.targetAudience || <span className="text-muted-foreground">Not specified</span>}
-              </p>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground font-medium">Pricing Model</span>
-              </div>
-              <p className="text-sm text-foreground mt-1 ml-6">
-                {project.pricingModel || <span className="text-muted-foreground">Not specified</span>}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Competitors */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-foreground">Competitors</h3>
-          {project.competitors.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {project.competitors.map((name) => (
-                <Badge key={name} variant="secondary">{name}</Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No competitors specified</p>
-          )}
-        </div>
-
-        <Separator />
-
-        {/* Timestamps + next step */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="flex gap-6">
             <div>

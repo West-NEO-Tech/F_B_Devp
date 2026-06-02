@@ -12,6 +12,7 @@ from app.llm.prompts import (
     SYSTEM_PROMPT,
     build_ai_complete_prompt,
     build_seed_builder_prompt,
+    seed_builder_max_tokens,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "build_ai_complete_prompt",
     "SEED_BUILDER_SYSTEM_PROMPT",
     "build_seed_builder_prompt",
+    "seed_builder_max_tokens",
 ]

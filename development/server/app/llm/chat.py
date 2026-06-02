@@ -20,6 +20,7 @@ async def chat_completion(
     *,
     messages: list[dict[str, str]],
     json_mode: bool = True,
+    max_tokens: int | None = None,
 ) -> str:
     """Call an OpenAI-compatible /chat/completions endpoint and return message content."""
     if not settings.llm_base_url:
@@ -33,7 +34,7 @@ async def chat_completion(
     base_payload: dict = {
         "model": settings.llm_model,
         "messages": messages,
-        "max_tokens": settings.llm_max_tokens,
+        "max_tokens": max_tokens if max_tokens is not None else settings.llm_max_tokens,
         "temperature": settings.llm_temperature,
     }
 

@@ -37,6 +37,7 @@ export interface SeedMaterialRead {
 
 interface SeedMaterialUpdate {
   competitors?: Record<string, unknown>[];
+  consumerPersonas?: Record<string, unknown>[];
   discussionTopics?: Record<string, unknown>[];
 }
 
@@ -53,16 +54,26 @@ export function useLatestSeedMaterial(scenarioId: string | undefined) {
   return { ...query, data: latest };
 }
 
+export interface SeedMaterialGenerateInput {
+  agentDepth: "quick" | "standard" | "deep";
+  agentCount: number;
+  marketConfig: { agent_distribution: Record<string, number> };
+}
+
 export function useGenerateSeedMaterials(scenarioId: string | undefined) {
   return useMutation({
-    mutationFn: () =>
+    mutationFn: (config: SeedMaterialGenerateInput) =>
       apiRequest<SeedMaterialRead>(
         "POST",
-        `/api/scenarios/${scenarioId}/seed-materials`
+        `/api/scenarios/${scenarioId}/seed-materials`,
+        config
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [`/api/scenarios/${scenarioId}/seed-materials`],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/scenarios/${scenarioId}`],
       });
     },
   });

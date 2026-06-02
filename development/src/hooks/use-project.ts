@@ -30,6 +30,16 @@ export function useUpdateProject(id: string) {
   });
 }
 
+export function useDeleteProject(id: string) {
+  return useMutation({
+    mutationFn: () => apiRequest<void>("DELETE", `/api/projects/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.removeQueries({ queryKey: [`/api/projects/${id}`] });
+    },
+  });
+}
+
 export function useAIComplete(id: string) {
   return useMutation({
     mutationFn: () =>

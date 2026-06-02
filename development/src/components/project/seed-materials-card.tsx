@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Check,
   TrendingUp,
-  Building2,
   Users,
   MessageCircle,
   ChevronRight,
@@ -10,6 +9,7 @@ import {
   Plus,
   RefreshCw,
   AlertCircle,
+  ArrowRight,
 } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,18 +20,24 @@ import type { SeedMaterialRead } from "@/hooks/use-seed-materials";
 interface SeedMaterialsCardProps {
   seedMaterial: SeedMaterialRead;
   onRegenerate: () => void;
-  onUpdateCompetitors: (competitors: Record<string, unknown>[]) => void;
+  onUpdateConsumerPersonas: (personas: Record<string, unknown>[]) => void;
   onUpdateTopics: (topics: Record<string, unknown>[]) => void;
   isRegenerating: boolean;
+  onStartSimulation?: () => void;
+  isStartingSimulation?: boolean;
 }
 
 export function SeedMaterialsCard({
   seedMaterial,
   onRegenerate,
-  onUpdateCompetitors,
+  onUpdateConsumerPersonas,
   onUpdateTopics,
   isRegenerating,
+  onStartSimulation,
+  isStartingSimulation,
 }: SeedMaterialsCardProps) {
+  const [marketContextOpen, setMarketContextOpen] = useState(true);
+
   if (seedMaterial.status === "failed") {
     return (
       <Card>
@@ -80,34 +86,26 @@ export function SeedMaterialsCard({
       <CardContent className="space-y-2">
         {/* Market Context */}
         {seedMaterial.marketContext && (
-          <MarketContextSection data={seedMaterial.marketContext} />
-        )}
-
-        {/* Competitors (editable) */}
-        {seedMaterial.competitors && (
-          <EditableTagSection
-            icon={<Building2 className="h-3.5 w-3.5" />}
-            title="Competitors"
-            items={seedMaterial.competitors.map((c) => c.name)}
-            onUpdate={(names) => {
-              const updated = names.map((name) => {
-                const existing = seedMaterial.competitors?.find((c) => c.name === name);
-                return existing || { name };
-              });
-              onUpdateCompetitors(updated);
-            }}
-            colorClass="text-chart-5"
+          <MarketContextSection
+            data={seedMaterial.marketContext}
+            open={marketContextOpen}
+            onToggle={() => setMarketContextOpen((v) => !v)}
           />
         )}
 
-        {/* Consumer Personas */}
+        {/* Consumer Personas (editable) */}
         {seedMaterial.consumerPersonas && (
-          <TagSection
+          <EditableTagSection
             icon={<Users className="h-3.5 w-3.5" />}
             title="Consumer Personas"
-            items={seedMaterial.consumerPersonas.map(
-              (p) => `${p.emoji || "👤"} ${p.name}`
-            )}
+            items={seedMaterial.consumerPersonas.map((p) => p.name)}
+            onUpdate={(names) => {
+              const updated = names.map((name) => {
+                const existing = seedMaterial.consumerPersonas?.find((p) => p.name === name);
+                return existing || { name };
+              });
+              onUpdateConsumerPersonas(updated);
+            }}
             colorClass="text-chart-4"
           />
         )}
@@ -131,6 +129,28 @@ export function SeedMaterialsCard({
             tagBg="bg-chart-2/10"
           />
         )}
+
+        {onStartSimulation && seedMaterial.status === "completed" && (
+          <div className="flex justify-end pt-2">
+            <Button
+              size="sm"
+              onClick={onStartSimulation}
+              disabled={isStartingSimulation}
+            >
+              {isStartingSimulation ? (
+                <>
+                  <div className="h-3.5 w-3.5 mr-1.5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
+                  Simulation
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -138,37 +158,82 @@ export function SeedMaterialsCard({
 
 function MarketContextSection({
   data,
+  open,
+  onToggle,
 }: {
   data: NonNullable<SeedMaterialRead["marketContext"]>;
+  open: boolean;
+  onToggle: () => void;
 }) {
+  const hasStats = data.marketSize || data.growthRate || (data.keyStats?.length ?? 0) > 0;
+
   return (
-    <div className="rounded-lg bg-muted p-3 cursor-pointer hover:bg-muted/80 transition-colors">
-      <div className="flex items-center justify-between">
+    <div className="rounded-lg bg-muted/80 border border-border/50 overflow-hidden">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onToggle();
+        }}
+        className="flex items-center justify-between gap-2 p-3 cursor-pointer hover:bg-muted transition-colors"
+      >
         <div className="flex items-center gap-1.5 text-xs font-medium text-chart-3">
           <TrendingUp className="h-3.5 w-3.5" />
           Market Context
         </div>
-        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40" />
+        <ChevronRight
+          className={[
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform",
+            open ? "rotate-90" : "",
+          ].join(" ")}
+        />
       </div>
-      <div className="flex gap-6 mt-2">
-        {data.marketSize && (
-          <div>
-            <div className="text-xl font-bold">{data.marketSize}</div>
-            <div className="text-[10px] text-muted-foreground">Market Size</div>
+
+      <div className="px-3 pb-3 space-y-3 border-t border-border/40">
+        {hasStats && (
+          <div className="flex flex-wrap gap-6 pt-3">
+            {data.marketSize && (
+              <div>
+                <div className="text-lg font-semibold leading-tight">{data.marketSize}</div>
+                <div className="text-[10px] text-muted-foreground">Market Size</div>
+              </div>
+            )}
+            {data.growthRate && (
+              <div>
+                <div className="text-lg font-semibold leading-tight text-green-600">
+                  {data.growthRate}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Annual Growth</div>
+              </div>
+            )}
+            {!open &&
+              data.keyStats?.slice(0, 1).map((s, i) => (
+                <div key={i}>
+                  <div className="text-lg font-semibold leading-tight">{s.value}</div>
+                  <div className="text-[10px] text-muted-foreground">{s.label}</div>
+                </div>
+              ))}
           </div>
         )}
-        {data.growthRate && (
-          <div>
-            <div className="text-xl font-bold text-green-500">{data.growthRate}</div>
-            <div className="text-[10px] text-muted-foreground">Annual Growth</div>
+
+        {open && data.summary && (
+          <p className="text-sm leading-relaxed text-foreground/90">{data.summary}</p>
+        )}
+
+        {open && data.keyStats && data.keyStats.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {data.keyStats.map((s, i) => (
+              <div
+                key={i}
+                className="rounded-md border border-border/50 bg-background/50 px-3 py-2"
+              >
+                <div className="text-xs text-muted-foreground">{s.label}</div>
+                <div className="text-sm font-semibold">{s.value}</div>
+              </div>
+            ))}
           </div>
         )}
-        {data.keyStats?.slice(0, 1).map((s, i) => (
-          <div key={i}>
-            <div className="text-xl font-bold">{s.value}</div>
-            <div className="text-[10px] text-muted-foreground">{s.label}</div>
-          </div>
-        ))}
       </div>
     </div>
   );

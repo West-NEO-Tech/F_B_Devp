@@ -1,0 +1,30 @@
+---
+description: Market Info Q&A question priority rules (Target Market, Audience, Pricing, Competitors)
+globs: development/server/app/services/market_qa*.py,development/src/**/step-market-info.tsx,development/src/hooks/use-market-qa.ts
+alwaysApply: false
+---
+
+# Market Info Q&A — Question Priority
+
+When generating or editing Market Info follow-up questions:
+
+## Priority topics (in order)
+
+1. **Target Market** — geography, vertical, segment, market wedge
+2. **Target Audience** — buyer, end user, persona, trigger context
+3. **Pricing** — model, price band, budget line, value metric
+4. **Competitors** — alternatives, strengths/weaknesses, differentiation
+
+## Rules
+
+- Parse the project **base description** (exclude `### Market Info (Q&A)` and answers below it).
+- If the description **does not adequately mention** a priority topic → **must ask about it first**, in the order above, before any supplemental questions.
+- If all four are already covered → **do not** repeat them; ask only the highest-value **supplemental** gaps for business analysis (problem depth, GTM, metrics, moat, constraints, traction, etc.).
+- Each question: long contextual `question` (all sub-points in the question text), `ask_for` always `[]`, tailored `example_answer`.
+
+## Implementation
+
+- Coverage heuristics + prompt + reorder: `development/server/app/services/market_qa_priority.py`
+- LLM entry: `development/server/app/services/market_qa_service.py`
+
+When changing behavior, update tests in `development/server/tests/test_market_qa_priority.py`.

@@ -70,12 +70,26 @@ def build_ai_complete_prompt(
 
 
 SEED_BUILDER_SYSTEM_PROMPT = (
-    "You are a market research analyst AI. "
-    "Given a business concept, generate comprehensive seed materials "
-    "for a business validation simulation. "
-    "You MUST respond with valid JSON matching the exact structure specified. "
-    "Be specific, data-driven, and realistic. Use real market data when possible."
+    "You are a market research analyst. Return ONLY valid JSON matching the user schema. "
+    "Be specific to the business concept. Keep every string concise."
 )
+
+_SEED_OUTPUT_COUNTS: dict[str, tuple[int, int, int, int]] = {
+    # competitors, personas, topics, key_stats
+    "quick": (2, 3, 4, 2),
+    "standard": (3, 4, 4, 3),
+    "deep": (3, 5, 5, 4),
+}
+
+SEED_BUILDER_MAX_TOKENS: dict[str, int] = {
+    "quick": 900,
+    "standard": 1100,
+    "deep": 1400,
+}
+
+
+def seed_builder_max_tokens(agent_depth: str) -> int:
+    return SEED_BUILDER_MAX_TOKENS.get(agent_depth, SEED_BUILDER_MAX_TOKENS["standard"])
 
 
 def build_seed_builder_prompt(
@@ -108,46 +122,28 @@ def build_seed_builder_prompt(
         dist_str = ", ".join(f"{k}: {v}" for k, v in agent_distribution.items())
         lines.append(f"Agent Distribution: {dist_str}")
 
-    lines.append("""
+    n_competitors, n_personas, n_topics, n_stats = _SEED_OUTPUT_COUNTS.get(
+        agent_depth, _SEED_OUTPUT_COUNTS["standard"]
+    )
+
+    lines.append(f"""
 ## Required Output (JSON)
 
 Return a JSON object with these exact keys:
 
-{
-  "market_context": {
-    "market_size": "<e.g. $85M or A$2.1B>",
-    "growth_rate": "<e.g. +12% annually>",
-    "key_stats": [{"label": "<stat name>", "value": "<stat value>"}],
-    "summary": "<2-3 sentence market overview>"
-  },
-  "competitors": [
-    {
-      "name": "<competitor name>",
-      "positioning": "<brief positioning>",
-      "strengths": ["<strength 1>", "<strength 2>"],
-      "weaknesses": ["<weakness 1>", "<weakness 2>"]
-    }
-  ],
-  "consumer_personas": [
-    {
-      "name": "<persona name>",
-      "emoji": "<single emoji>",
-      "age_range": "<e.g. 25-35>",
-      "description": "<2-3 sentence description>",
-      "pain_points": ["<pain point 1>", "<pain point 2>"]
-    }
-  ],
-  "discussion_topics": [
-    {
-      "topic": "<topic name>",
-      "description": "<why this matters>",
-      "relevance": "<high|medium|low>"
-    }
-  ]
-}
+{{
+  "market_context": {{
+    "market_size": "<e.g. $85M>",
+    "growth_rate": "<e.g. +12% YoY>",
+    "key_stats": [{{"label": "<stat>", "value": "<value>"}}],
+    "summary": "<2 short sentences>"
+  }},
+  "competitors": [{{"name": "<name>", "positioning": "<one line>"}}],
+  "consumer_personas": [{{"name": "<name>", "emoji": "<emoji>", "description": "<one sentence>"}}],
+  "discussion_topics": [{{"topic": "<topic>", "relevance": "high|medium|low"}}]
+}}
 
-Generate 3-5 competitors, 3-5 consumer personas, and 4-6 discussion topics.
-Be specific to the business concept and market.""")
-
+Counts: exactly {n_competitors} competitors, {n_personas} personas, {n_topics} topics, {n_stats} key_stats.
+Do not add extra keys. No strengths/weaknesses/pain_points arrays.""")
 
     return "\n".join(lines)

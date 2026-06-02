@@ -50,6 +50,7 @@ async def get_run(
     run_id: uuid.UUID, session: AsyncSession = Depends(get_session)
 ) -> RunRead:
     run = await run_service.get_run(session, run_id)
+    await session.commit()
     return RunRead.model_validate(run, from_attributes=True)
 
 

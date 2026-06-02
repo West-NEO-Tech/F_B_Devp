@@ -8,6 +8,7 @@ import { StepProductType } from "@/components/wizard/step-product-type";
 import { StepMarketInfo } from "@/components/wizard/step-market-info";
 import { StepConfirmation } from "@/components/wizard/step-confirmation";
 import { AICompletePreview } from "@/components/wizard/ai-complete-preview";
+import { marketQABaseDescription, useIncrementalMarketQA } from "@/hooks/use-market-qa";
 
 const STEP_LABELS = ["Basic Info", "Product Type", "Market Info", "Confirmation"];
 
@@ -81,10 +82,7 @@ export default function ProjectWizardPage() {
       if (!projectId) return;
       updateProject.mutate(
         {
-          targetMarket: formData.targetMarket || undefined,
-          targetAudience: formData.targetAudience || undefined,
-          pricingModel: formData.pricingModel || undefined,
-          competitors: formData.competitors.length > 0 ? formData.competitors : undefined,
+          description: formData.description.trim() || undefined,
           status: "active",
         },
         {
@@ -136,6 +134,19 @@ export default function ProjectWizardPage() {
     setShowAIPreview(false);
   }
 
+  // Start incremental Q generation once description exists (debounced); continues on Product Type / Market Info.
+  const shouldGenerateMarketQA = !!marketQABaseDescription(formData.description).trim();
+
+  const {
+    questions: marketQuestions,
+    targetCount: marketQATargetCount,
+    isGenerating: marketQAGenerating,
+  } = useIncrementalMarketQA(
+    formData.description,
+    formData.productType,
+    shouldGenerateMarketQA
+  );
+
   const isSubmitting = createProject.isPending || updateProject.isPending;
   const isNextDisabled =
     (currentStep === 1 && !formData.name.trim()) || isSubmitting;
@@ -167,15 +178,13 @@ export default function ProjectWizardPage() {
         )}
         {currentStep === 3 && (
           <StepMarketInfo
-            formData={{
-              targetMarket: formData.targetMarket,
-              targetAudience: formData.targetAudience,
-              pricingModel: formData.pricingModel,
-              competitors: formData.competitors,
-            }}
-            onChange={updateField}
-            onAIComplete={handleAIComplete}
-            isAICompleting={aiComplete.isPending}
+            description={formData.description}
+            productType={formData.productType}
+            onChange={(field, value) => updateField(field, value)}
+            questions={marketQuestions}
+            targetCount={marketQATargetCount}
+            isGenerating={marketQAGenerating}
+            onFinish={() => setCurrentStep(4)}
           />
         )}
         {currentStep === 4 && <StepConfirmation project={formData} />}

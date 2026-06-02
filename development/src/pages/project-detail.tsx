@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { ArrowLeft } from "lucide-react";
-import { useProject, useUpdateProject } from "@/hooks/use-project";
-import { useProjectScenario, useUpdateScenario, useEnsureScenario } from "@/hooks/use-scenario";
+import { useProject, useUpdateProject, useDeleteProject } from "@/hooks/use-project";
+import { useProjectScenario, useEnsureScenario } from "@/hooks/use-scenario";
 import {
   useLatestSeedMaterial,
   useSeedMaterials,
@@ -30,6 +30,8 @@ import { SimulationConfigCard } from "@/components/project/simulation-config-car
 import { SeedMaterialsCard } from "@/components/project/seed-materials-card";
 import { LockedStepCard } from "@/components/project/locked-step-card";
 import { RunHistorySection } from "@/components/project/run-history-section";
+import { SimulationReportPanel } from "@/components/project/simulation-report-panel";
+import { useStartSimulation, useRunStatus } from "@/hooks/use-simulation";
 import { DEPTH_CONFIGS, type SimulationDepth, type AgentRole } from "@/lib/agent-templates";
 import type { ProjectUpdate } from "@/types/api";
 
@@ -40,6 +42,7 @@ function isProjectInfoComplete(project: { name: string; productType?: string | n
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const [, setLocation] = useLocation();
 
   const { data: project, isLoading: projectLoading, error: projectError } = useProject(id);
   const { data: scenario, isLoading: scenarioLoading } = useProjectScenario(id);
@@ -56,7 +59,7 @@ export default function ProjectDetailPage() {
   const { data: allSeeds } = useSeedMaterials(scenario?.id);
 
   const updateProject = useUpdateProject(id!);
-  const updateScenario = useUpdateScenario(scenario?.id);
+  const deleteProject = useDeleteProject(id!);
   const generateSeed = useGenerateSeedMaterials(scenario?.id);
   const updateSeed = useUpdateSeedMaterial(latestSeed?.id);
 
@@ -64,6 +67,20 @@ export default function ProjectDetailPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const [showHistory, setShowHistory] = useState(false);
+  const [activeRunId, setActiveRunId] = useState<string | undefined>();
+
+  const startSimulation = useStartSimulation();
+  const { data: runData, isLoading: runLoading, isError: runError } =
+    useRunStatus(activeRunId);
+
+  // Allow deep-linking to report via ?runid=<uuid>
+  useEffect(() => {
+    const runid = new URLSearchParams(window.location.search).get("runid");
+    if (runid) {
+      setActiveRunId(runid);
+      setActiveTab("report");
+    }
+  }, [id]);
 
   // Local simulation config state — initialised lazily; synced when scenario loads
   const [depth, setDepth] = useState<SimulationDepth>("standard");
@@ -97,8 +114,11 @@ export default function ProjectDetailPage() {
       label: "Seed Materials",
       status: hasSeed ? "completed" : infoComplete ? "active" : "locked",
     },
-    { id: "sim", label: "Simulation", status: "locked" },
-    { id: "report", label: "Report", status: "locked" },
+    {
+      id: "report",
+      label: "Report",
+      status: hasSeed ? (activeRunId ? "active" : "locked") : "locked",
+    },
   ];
 
   function handleSave(data: ProjectUpdate) {
@@ -113,33 +133,70 @@ export default function ProjectDetailPage() {
     });
   }
 
-  function handleGenerate() {
-    // Save scenario config first
-    updateScenario.mutate(
+  function handleDeleteProject() {
+    deleteProject.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: "Project deleted" });
+        setLocation("/projects");
+      },
+      onError: (err) => {
+        toast({
+          title: "Delete failed",
+          description: err instanceof Error ? err.message : "Could not delete project",
+          variant: "destructive",
+        });
+      },
+    });
+  }
+
+  function handleStartSimulation() {
+    if (!scenario?.id || !latestSeed?.id || !project?.id) return;
+    startSimulation.mutate(
       {
-        agentDepth: depth,
-        agentCount: Object.values(distribution).reduce((a, b) => a + b, 0),
-        marketConfig: { agent_distribution: distribution },
+        scenarioId: scenario.id,
+        userId: project.id,
+        seedMaterialId: latestSeed.id,
       },
       {
-        onSuccess: () => {
-          generateSeed.mutate(undefined, {
-            onSuccess: () => {
-              toast({ title: "Seed materials generated" });
-            },
-            onError: (err) => {
-              const message =
-                err instanceof Error ? err.message : "Generation failed";
-              toast({
-                title: "Generation failed",
-                description: message,
-                variant: "destructive",
-              });
-            },
+        onSuccess: (result) => {
+          setActiveRunId(result.runId);
+          setActiveTab("report");
+          setLocation(`/projects/${id}?runid=${result.runId}`);
+          toast({ title: "Simulation started" });
+        },
+        onError: (err) => {
+          const message = err instanceof Error ? err.message : "Failed to start simulation";
+          toast({
+            title: "Could not start simulation",
+            description: message,
+            variant: "destructive",
           });
         },
       }
     );
+  }
+
+  function handleGenerate() {
+    const config = {
+      agentDepth: depth,
+      agentCount: Object.values(distribution).reduce((a, b) => a + b, 0),
+      marketConfig: { agent_distribution: distribution },
+    };
+    setActiveTab("seed");
+    generateSeed.mutate(config, {
+      onSuccess: () => {
+        toast({ title: "Seed materials generated" });
+      },
+      onError: (err) => {
+        const message =
+          err instanceof Error ? err.message : "Generation failed";
+        toast({
+          title: "Generation failed",
+          description: message,
+          variant: "destructive",
+        });
+      },
+    });
   }
 
   if (projectLoading || scenarioLoading) {
@@ -234,6 +291,8 @@ export default function ProjectDetailPage() {
             <ProjectInfoCard
               project={project}
               onEdit={() => setIsEditing(true)}
+              onDelete={handleDeleteProject}
+              isDeleting={deleteProject.isPending}
               onContinueToSimConfig={() => setActiveTab("config")}
               canContinueToSimConfig={infoComplete}
             />
@@ -262,13 +321,15 @@ export default function ProjectDetailPage() {
             <SeedMaterialsCard
               seedMaterial={latestSeed}
               onRegenerate={handleGenerate}
-              onUpdateCompetitors={(competitors) =>
-                updateSeed.mutate({ competitors })
+              onUpdateConsumerPersonas={(consumerPersonas) =>
+                updateSeed.mutate({ consumerPersonas })
               }
               onUpdateTopics={(topics) =>
                 updateSeed.mutate({ discussionTopics: topics })
               }
               isRegenerating={generateSeed.isPending}
+              onStartSimulation={handleStartSimulation}
+              isStartingSimulation={startSimulation.isPending}
             />
           ) : generateSeed.isPending ? (
             <Card>
@@ -284,14 +345,17 @@ export default function ProjectDetailPage() {
           )
         )}
 
-        {/* Simulation tab */}
-        {activeTab === "sim" && (
-          <LockedStepCard title="Simulation" phaseLabel="Phase 2" />
-        )}
-
         {/* Report tab */}
         {activeTab === "report" && (
-          <LockedStepCard title="Report" phaseLabel="Phase 3" />
+          hasSeed ? (
+            activeRunId ? (
+              <SimulationReportPanel run={runData} isLoading={runLoading} isError={runError} />
+            ) : (
+              <LockedStepCard title="Report" phaseLabel="Start from Seed Materials tab" />
+            )
+          ) : (
+            <LockedStepCard title="Report" phaseLabel="Complete seed materials first" />
+          )
         )}
       </div>
     </div>

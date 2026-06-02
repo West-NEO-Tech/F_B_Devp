@@ -68,7 +68,38 @@ async def get_run(session: AsyncSession, run_id: uuid.UUID) -> SimulationRun:
     run = result.scalar_one_or_none()
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
+
+    _maybe_finalize_simulation_run(run)
+    await session.flush()
     return run
+
+
+def _maybe_finalize_simulation_run(run: SimulationRun) -> None:
+    """Auto-complete simulation runs based on expected_done_at in result_summary.
+
+    This is a lightweight placeholder until we have a real simulation worker.
+    """
+    if run.status != "running":
+        return
+    summary = run.result_summary or {}
+    expected_done_at = summary.get("expected_done_at")
+    if not expected_done_at:
+        return
+
+    try:
+        expected = datetime.fromisoformat(str(expected_done_at).replace("Z", "+00:00"))
+    except Exception:
+        return
+
+    now = datetime.now(timezone.utc)
+    if now < expected:
+        return
+
+    run.status = "completed"
+    run.completed_at = now
+    summary["simulation_status"] = "completed"
+    run.result_summary = summary
+    run.updated_at = now
 
 
 async def update_run_status(
