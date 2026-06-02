@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Briefcase,
   Globe,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -19,6 +20,8 @@ import type { ProjectRead } from "@/types/api";
 interface ProjectInfoCardProps {
   project: ProjectRead;
   onEdit: () => void;
+  onContinueToSimConfig?: () => void;
+  canContinueToSimConfig?: boolean;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -26,6 +29,8 @@ interface ProjectInfoCardProps {
 export function ProjectInfoCard({
   project,
   onEdit,
+  onContinueToSimConfig,
+  canContinueToSimConfig = true,
   collapsed,
   onToggleCollapse,
 }: ProjectInfoCardProps) {
@@ -183,6 +188,24 @@ export function ProjectInfoCard({
             </p>
           </div>
         </div>
+
+        {onContinueToSimConfig && (
+          <div className="flex justify-end pt-2">
+            <Button
+              size="sm"
+              onClick={onContinueToSimConfig}
+              disabled={!canContinueToSimConfig}
+              title={
+                canContinueToSimConfig
+                  ? undefined
+                  : "Complete project name and product type first"
+              }
+            >
+              <ArrowRight className="h-3.5 w-3.5 mr-1.5" />
+              Sim Config
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

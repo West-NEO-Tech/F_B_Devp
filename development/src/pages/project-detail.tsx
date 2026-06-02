@@ -234,6 +234,8 @@ export default function ProjectDetailPage() {
             <ProjectInfoCard
               project={project}
               onEdit={() => setIsEditing(true)}
+              onContinueToSimConfig={() => setActiveTab("config")}
+              canContinueToSimConfig={infoComplete}
             />
           )
         )}
