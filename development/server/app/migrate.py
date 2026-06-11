@@ -1,4 +1,4 @@
-"""Apply Alembic migrations on startup (local/dev only)."""
+"""Apply Alembic migrations on startup (local, serverless, and CI)."""
 
 from __future__ import annotations
 

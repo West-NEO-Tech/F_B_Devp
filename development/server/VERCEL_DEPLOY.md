@@ -34,22 +34,25 @@ server/
 | `LLM_API_KEY` | `sk-or-...` | 对应的 API Key |
 | `LLM_MODEL` | `openai/gpt-4o-mini` | 模型名 |
 | `CORS_ORIGINS` | `["https://你的前端.vercel.app"]` | JSON 数组字符串 |
-| `SKIP_SEED` | `true` | Serverless 冷启动跳过 seed，改成手动跑 |
+| `SKIP_SEED` | `true` | Serverless 冷启动跳过 seed（**迁移仍会自动执行**） |
 | `LOG_LEVEL` | `INFO` | 可选 |
 
 ⚠️ **Neon 连接串注意**: 使用 `*-pooler.*.neon.tech` 的 host，并在末尾加 `?sslmode=require`。
 代码 (`app/config.py`) 会自动把 `postgresql://` 转成 `postgresql+asyncpg://`。
 
-### 3. 跑数据库迁移 & seed（一次性，本地执行）
+### 3. 数据库迁移
 
-Vercel Serverless 不适合跑 migration。在本地针对生产 DB 执行：
+**默认行为（推荐）**：后端在每次冷启动时会自动执行 `alembic upgrade head`（含 Vercel）。部署新代码后，**第一次 API 请求**会完成迁移，之后创建 Project 不应再出现 503。
+
+若仍报 schema 相关 503，可在本地对**生产库**手动执行一次：
 
 ```bash
 cd development/server
-export DATABASE_URL='你的生产连接串'
-.venv/bin/alembic upgrade head
-.venv/bin/python -m seed.agent_templates   # 如果 seed 是可执行模块
+export DATABASE_URL='你的生产连接串（与 Vercel 环境变量相同）'
+uv run alembic upgrade head
 ```
+
+Agent templates seed 为可选（通常仅首次需要），见 `seed/agent_templates.py`。
 
 ### 4. 部署
 

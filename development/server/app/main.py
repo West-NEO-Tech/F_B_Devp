@@ -47,16 +47,15 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger("bizsim")
     logger.info("Starting BizSim API server")
 
-    # Seed data — tolerate missing database so the server can still start.
-    # Skipped automatically in serverless (Vercel) — set SKIP_SEED=true to run alembic + seed manually.
+    # Migrations run on every environment (including Vercel). Seed stays off serverless.
+    try:
+        await asyncio.to_thread(upgrade_to_head)
+    except Exception as exc:
+        logger.warning("Database migration failed: %s", exc)
+
     if settings.skip_seed:
         logger.info("Seed data skipped — SKIP_SEED=true")
-    else:
-        if not settings.is_serverless:
-            try:
-                await asyncio.to_thread(upgrade_to_head)
-            except Exception as exc:
-                logger.warning("Database migration skipped: %s", exc)
+    elif not settings.is_serverless:
         try:
             async with async_session_factory() as session:
                 from seed.agent_templates import seed_agent_templates

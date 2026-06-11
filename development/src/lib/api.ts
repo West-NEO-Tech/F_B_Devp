@@ -39,10 +39,19 @@ export async function apiRequest<T = unknown>(
   }
 
   if (response.status >= 500) {
+    let serverMessage = `${response.status} ${response.statusText}`;
+    try {
+      const body = await response.clone().json();
+      if (typeof body?.detail === "string") {
+        serverMessage = body.detail;
+      }
+    } catch {
+      // ignore non-JSON body
+    }
     if (!options?.silentServerError) {
       toast({
-        title: "服务器异常",
-        description: `${response.status} ${response.statusText}`,
+        title: response.status === 503 ? "服务暂不可用" : "服务器异常",
+        description: serverMessage,
         variant: "destructive",
       });
     }
