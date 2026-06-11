@@ -35,9 +35,15 @@ def do_run_migrations(connection):
 
 
 def run_migrations_online() -> None:
-    # Sync psycopg engine — reliable on Vercel/Neon (async migrations often fail on pooler/SSL).
     url = config.get_main_option("sqlalchemy.url")
-    engine = create_engine(url, poolclass=pool.NullPool)
+    connect_args: dict = {"connect_timeout": 30}
+    if "sslmode=" in url or "neon.tech" in url:
+        connect_args["sslmode"] = "require"
+    engine = create_engine(
+        url,
+        poolclass=pool.NullPool,
+        connect_args=connect_args,
+    )
     with engine.connect() as connection:
         do_run_migrations(connection)
     engine.dispose()

@@ -12,7 +12,6 @@ from app.config import settings
 from app.database import async_session_factory, engine
 from app.llm import LLMServiceError
 from app.middleware.logging import RequestLoggingMiddleware
-from app.middleware.migrations import EnsureMigrationsMiddleware
 from app.migration_guard import ensure_migrations_async
 from app.routers import (
     agent_templates,
@@ -88,7 +87,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(RequestLoggingMiddleware)
-    application.add_middleware(EnsureMigrationsMiddleware)
 
     @application.get("/", include_in_schema=False)
     async def root() -> dict[str, str]:

@@ -45,12 +45,13 @@ server/
 
 ### 3. 数据库迁移
 
-**默认行为（推荐）**：
+**默认行为**：
 
-1. **部署时**：`vercel.json` 的 `buildCommand` 会执行 `python -m app.migrate`（需 Vercel 环境变量里已配置 `DATABASE_URL`）。
-2. **运行时**：每个 Serverless 实例在**首个 API 请求**时也会再跑一次 `alembic upgrade head`（防止 lifespan 未触发）。
+1. **部署时**：`buildCommand` 执行 `scripts/vercel_build.py`（需 Vercel 环境变量里已配置 `DATABASE_URL`，且勾选 **Available during Build**）。
+2. **冷启动时**：`api/index.py` 会再尝试一次迁移（失败**不会**拦截 API，仅打日志）。
+3. 若只有 Neon **pooler** 的 `DATABASE_URL`，代码会自动推导 **direct** 地址（去掉主机名中的 `-pooler`）用于迁移。
 
-部署新代码后，Generate Pre-Simulation Display 不应再因 `agent_depth` / `custom` 报迁移错误。
+`DATABASE_URL_UNPOOLED` 仍建议配置（Neon + Vercel 集成通常会自动注入），但不是必须。
 
 若仍报 schema 相关 503，可在本地对**生产库**手动执行一次：
 
