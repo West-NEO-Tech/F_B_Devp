@@ -8,7 +8,7 @@
 server/
 ├── api/index.py        # Vercel 入口，导出 FastAPI app
 ├── vercel.json         # Vercel 配置 (Python runtime + rewrites)
-├── requirements.txt    # 已精简，移除 uvloop/httptools/watchfiles/websockets/redis
+├── requirements.txt    # Vercel 用：`uv export --no-dev --no-hashes --no-emit-project -o requirements.txt`（勿含 `-e .`）
 └── app/                # FastAPI 应用代码
 ```
 
