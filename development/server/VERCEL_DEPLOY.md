@@ -42,7 +42,12 @@ server/
 
 ### 3. 数据库迁移
 
-**默认行为（推荐）**：后端在每次冷启动时会自动执行 `alembic upgrade head`（含 Vercel）。部署新代码后，**第一次 API 请求**会完成迁移，之后创建 Project 不应再出现 503。
+**默认行为（推荐）**：
+
+1. **部署时**：`vercel.json` 的 `buildCommand` 会执行 `python -m app.migrate`（需 Vercel 环境变量里已配置 `DATABASE_URL`）。
+2. **运行时**：每个 Serverless 实例在**首个 API 请求**时也会再跑一次 `alembic upgrade head`（防止 lifespan 未触发）。
+
+部署新代码后，Generate Pre-Simulation Display 不应再因 `agent_depth` / `custom` 报迁移错误。
 
 若仍报 schema 相关 503，可在本地对**生产库**手动执行一次：
 

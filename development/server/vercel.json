@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python -m app.migrate",
   "functions": {
     "api/index.py": {
       "runtime": "@vercel/python@4.3.1",

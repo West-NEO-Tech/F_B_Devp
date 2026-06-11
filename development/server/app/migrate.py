@@ -21,3 +21,7 @@ def upgrade_to_head() -> None:
     cfg = Config(str(_ALEMBIC_INI))
     command.upgrade(cfg, "head")
     logger.info("Database migrations applied (alembic upgrade head)")
+
+
+if __name__ == "__main__":
+    upgrade_to_head()

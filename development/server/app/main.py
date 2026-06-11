@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -13,7 +12,8 @@ from app.config import settings
 from app.database import async_session_factory, engine
 from app.llm import LLMServiceError
 from app.middleware.logging import RequestLoggingMiddleware
-from app.migrate import upgrade_to_head
+from app.middleware.migrations import EnsureMigrationsMiddleware
+from app.migration_guard import ensure_migrations_async
 from app.routers import (
     agent_templates,
     env_demo,
@@ -47,11 +47,11 @@ async def lifespan(app: FastAPI):
     logger = logging.getLogger("bizsim")
     logger.info("Starting BizSim API server")
 
-    # Migrations run on every environment (including Vercel). Seed stays off serverless.
+    # Migrations: lifespan + per-request middleware (Vercel often skips lifespan).
     try:
-        await asyncio.to_thread(upgrade_to_head)
+        await ensure_migrations_async()
     except Exception as exc:
-        logger.warning("Database migration failed: %s", exc)
+        logger.warning("Database migration failed in lifespan: %s", exc)
 
     if settings.skip_seed:
         logger.info("Seed data skipped — SKIP_SEED=true")
@@ -88,6 +88,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     application.add_middleware(RequestLoggingMiddleware)
+    application.add_middleware(EnsureMigrationsMiddleware)
 
     @application.get("/", include_in_schema=False)
     async def root() -> dict[str, str]:
@@ -120,8 +121,9 @@ def create_app() -> FastAPI:
         msg = str(exc.orig) if exc.orig else str(exc)
         if "agent_depth" in msg:
             detail = (
-                "Invalid simulation depth. Run database migrations: "
-                "cd development/server && uv run alembic upgrade head"
+                "Simulation depth is not supported by the database yet (often missing "
+                "'custom' in agent_depth). Run migrations against production: "
+                "cd development/server && DATABASE_URL=<prod> uv run alembic upgrade head"
             )
         return JSONResponse(status_code=409, content={"detail": detail})
 
