@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Check,
-  TrendingUp,
   Users,
   MessageCircle,
   ChevronRight,
@@ -10,15 +9,22 @@ import {
   RefreshCw,
   AlertCircle,
   ArrowRight,
+  ScrollText,
 } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { AgentDistributionDisplay } from "@/components/project/agent-distribution-display";
 import type { SeedMaterialRead } from "@/hooks/use-seed-materials";
+import type { AgentKindItem } from "@/hooks/use-pre-simulation-display";
+import type { AgentRole } from "@/lib/agent-templates";
 
 interface SeedMaterialsCardProps {
   seedMaterial: SeedMaterialRead;
+  distribution: Record<AgentRole, number>;
+  agentKinds?: AgentKindItem[] | null;
+  uploadedDisplay?: Record<string, unknown> | null;
   onRegenerate: () => void;
   onUpdateConsumerPersonas: (personas: Record<string, unknown>[]) => void;
   onUpdateTopics: (topics: Record<string, unknown>[]) => void;
@@ -29,6 +35,9 @@ interface SeedMaterialsCardProps {
 
 export function SeedMaterialsCard({
   seedMaterial,
+  distribution,
+  agentKinds,
+  uploadedDisplay,
   onRegenerate,
   onUpdateConsumerPersonas,
   onUpdateTopics,
@@ -36,7 +45,7 @@ export function SeedMaterialsCard({
   onStartSimulation,
   isStartingSimulation,
 }: SeedMaterialsCardProps) {
-  const [marketContextOpen, setMarketContextOpen] = useState(true);
+  const [simulationQueryOpen, setSimulationQueryOpen] = useState(true);
 
   if (seedMaterial.status === "failed") {
     return (
@@ -44,7 +53,7 @@ export function SeedMaterialsCard({
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <AlertCircle className="h-4 w-4 text-destructive" />
-            Seed Materials
+            Pre-Simulation Display
           </div>
           <Button
             variant="ghost"
@@ -71,7 +80,7 @@ export function SeedMaterialsCard({
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold">
           <Check className="h-4 w-4 text-green-500" />
-          Seed Materials
+          Pre-Simulation Display
         </div>
         <Button
           variant="ghost"
@@ -84,12 +93,15 @@ export function SeedMaterialsCard({
         </Button>
       </CardHeader>
       <CardContent className="space-y-2">
-        {/* Market Context */}
-        {seedMaterial.marketContext && (
-          <MarketContextSection
-            data={seedMaterial.marketContext}
-            open={marketContextOpen}
-            onToggle={() => setMarketContextOpen((v) => !v)}
+        {uploadedDisplay && Object.keys(uploadedDisplay).length > 0 && (
+          <UploadedDisplaySection content={uploadedDisplay} />
+        )}
+
+        {seedMaterial.simulationQuery && (
+          <SimulationQuerySection
+            query={seedMaterial.simulationQuery}
+            open={simulationQueryOpen}
+            onToggle={() => setSimulationQueryOpen((v) => !v)}
           />
         )}
 
@@ -130,6 +142,8 @@ export function SeedMaterialsCard({
           />
         )}
 
+        <AgentDistributionDisplay distribution={distribution} agentKinds={agentKinds} />
+
         {onStartSimulation && seedMaterial.status === "completed" && (
           <div className="flex justify-end pt-2">
             <Button
@@ -156,31 +170,23 @@ export function SeedMaterialsCard({
   );
 }
 
-function MarketContextSection({
-  data,
-  open,
-  onToggle,
-}: {
-  data: NonNullable<SeedMaterialRead["marketContext"]>;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  const hasStats = data.marketSize || data.growthRate || (data.keyStats?.length ?? 0) > 0;
+function UploadedDisplaySection({ content }: { content: Record<string, unknown> }) {
+  const [open, setOpen] = useState(true);
 
   return (
-    <div className="rounded-lg bg-muted/80 border border-border/50 overflow-hidden">
+    <div className="rounded-lg border border-chart-3/25 bg-chart-3/5 overflow-hidden">
       <div
         role="button"
         tabIndex={0}
-        onClick={onToggle}
+        onClick={() => setOpen((v) => !v)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") onToggle();
+          if (e.key === "Enter" || e.key === " ") setOpen((v) => !v);
         }}
-        className="flex items-center justify-between gap-2 p-3 cursor-pointer hover:bg-muted transition-colors"
+        className="flex items-center justify-between gap-2 p-3 cursor-pointer hover:bg-chart-3/10 transition-colors"
       >
         <div className="flex items-center gap-1.5 text-xs font-medium text-chart-3">
-          <TrendingUp className="h-3.5 w-3.5" />
-          Market Context
+          <ScrollText className="h-3.5 w-3.5" />
+          Simulation Upload
         </div>
         <ChevronRight
           className={[
@@ -189,52 +195,55 @@ function MarketContextSection({
           ].join(" ")}
         />
       </div>
+      {open && (
+        <div className="px-3 pb-3 border-t border-chart-3/15">
+          <pre className="text-xs leading-relaxed text-foreground/90 pt-3 overflow-x-auto whitespace-pre-wrap">
+            {JSON.stringify(content, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      <div className="px-3 pb-3 space-y-3 border-t border-border/40">
-        {hasStats && (
-          <div className="flex flex-wrap gap-6 pt-3">
-            {data.marketSize && (
-              <div>
-                <div className="text-lg font-semibold leading-tight">{data.marketSize}</div>
-                <div className="text-[10px] text-muted-foreground">Market Size</div>
-              </div>
-            )}
-            {data.growthRate && (
-              <div>
-                <div className="text-lg font-semibold leading-tight text-green-600">
-                  {data.growthRate}
-                </div>
-                <div className="text-[10px] text-muted-foreground">Annual Growth</div>
-              </div>
-            )}
-            {!open &&
-              data.keyStats?.slice(0, 1).map((s, i) => (
-                <div key={i}>
-                  <div className="text-lg font-semibold leading-tight">{s.value}</div>
-                  <div className="text-[10px] text-muted-foreground">{s.label}</div>
-                </div>
-              ))}
-          </div>
-        )}
-
-        {open && data.summary && (
-          <p className="text-sm leading-relaxed text-foreground/90">{data.summary}</p>
-        )}
-
-        {open && data.keyStats && data.keyStats.length > 0 && (
-          <div className="grid gap-2 sm:grid-cols-2">
-            {data.keyStats.map((s, i) => (
-              <div
-                key={i}
-                className="rounded-md border border-border/50 bg-background/50 px-3 py-2"
-              >
-                <div className="text-xs text-muted-foreground">{s.label}</div>
-                <div className="text-sm font-semibold">{s.value}</div>
-              </div>
-            ))}
-          </div>
-        )}
+function SimulationQuerySection({
+  query,
+  open,
+  onToggle,
+}: {
+  query: string;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="rounded-lg border border-primary/25 bg-primary/5 overflow-hidden">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onToggle();
+        }}
+        className="flex items-center justify-between gap-2 p-3 cursor-pointer hover:bg-primary/10 transition-colors"
+      >
+        <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
+          <ScrollText className="h-3.5 w-3.5" />
+          Simulation Query
+        </div>
+        <ChevronRight
+          className={[
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform",
+            open ? "rotate-90" : "",
+          ].join(" ")}
+        />
       </div>
+      {open && (
+        <div className="px-3 pb-3 border-t border-primary/15">
+          <p className="text-sm leading-relaxed text-foreground/90 pt-3 whitespace-pre-wrap">
+            {query}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ class SimulationScenario(BaseMixin, Base):
     __tablename__ = "simulation_scenarios"
     __table_args__ = (
         CheckConstraint(
-            "agent_depth IN ('quick', 'standard', 'deep')",
+            "agent_depth IN ('quick', 'standard', 'deep', 'custom')",
             name="ck_scenario_agent_depth",
         ),
         CheckConstraint("agent_count > 0", name="ck_scenario_agent_count_positive"),

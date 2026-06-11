@@ -20,6 +20,7 @@ When generating or editing Market Info follow-up questions:
 - Parse the project **base description** (exclude `### Market Info (Q&A)` and answers below it).
 - If the description **does not adequately mention** a priority topic → **must ask about it first**, in the order above, before any supplemental questions.
 - If all four are already covered → **do not** repeat them; ask only the highest-value **supplemental** gaps for business analysis (problem depth, GTM, metrics, moat, constraints, traction, etc.).
+- **Last question — simulation business goal:** if the base description has **no clear** simulation business goal, or only a **vague** one (e.g. “validate my idea”, “market validation”), the **final** question **must** use id `simulation_business_goal` and ask what decision or problem this run should answer.
 - Each question: long contextual `question` (all sub-points in the question text), `ask_for` always `[]`, tailored `example_answer`.
 
 ## Implementation

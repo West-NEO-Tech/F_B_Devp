@@ -24,7 +24,16 @@ DEPTH_MINUTES: dict[str, int] = {
     "quick": 2,
     "standard": 6,
     "deep": 12,
+    "custom": 6,
 }
+
+
+def _expected_minutes(scenario: SimulationScenario) -> int:
+    depth = getattr(scenario, "agent_depth", "") or "standard"
+    if depth == "custom":
+        count = getattr(scenario, "agent_count", 81) or 81
+        return max(2, min(60, count // 15 + 2))
+    return DEPTH_MINUTES.get(depth, 6)
 
 
 def _as_json_list(value: object | None) -> list:
@@ -91,7 +100,7 @@ async def start_simulation(
 
     seed = await _get_completed_seed(session, seed_material_id, scenario_id)
 
-    expected_minutes = DEPTH_MINUTES.get(getattr(scenario, "agent_depth", ""), 6)
+    expected_minutes = _expected_minutes(scenario)
     expected_done_at = datetime.now(timezone.utc) + timedelta(minutes=expected_minutes)
 
     run = SimulationRun(
@@ -138,7 +147,7 @@ async def get_run_agents(
     qa_raw = parse_additional_information(full_description)
 
     agent_depth = scenario.agent_depth
-    if agent_depth not in ("quick", "standard", "deep"):
+    if agent_depth not in ("quick", "standard", "deep", "custom"):
         agent_depth = "standard"
 
     return SimulationAgentsResponse(
@@ -152,6 +161,7 @@ async def get_run_agents(
         discussion_topics=_topic_title_strings(seed.discussion_topics),
         additional_information=[MarketInfoQAItem.model_validate(q) for q in qa_raw],
         sim_config_type=agent_depth,  # type: ignore[arg-type]
+        simulation_query=seed.simulation_query,
     )
 
 
@@ -201,6 +211,6 @@ async def _get_completed_seed(
     if seed.status != "completed":
         raise HTTPException(
             status_code=409,
-            detail="Seed materials must be completed before starting simulation",
+            detail="Pre-simulation display must be completed before starting simulation",
         )
     return seed

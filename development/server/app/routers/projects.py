@@ -7,7 +7,8 @@ from app.database import get_session
 from app.schemas.ai_complete import AICompleteResponse
 from app.schemas.common import PaginatedResponse
 from app.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
-from app.services import ai_complete_service, project_service
+from app.schemas.seed_material import SimulationQueryRead
+from app.services import ai_complete_service, project_service, seed_builder_service
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -43,6 +44,22 @@ async def get_project(
 ) -> ProjectRead:
     project = await project_service.get_project(session, project_id)
     return ProjectRead.model_validate(project, from_attributes=True)
+
+
+@router.get("/{project_id}/simulation-query", response_model=SimulationQueryRead)
+async def get_project_simulation_query(
+    project_id: uuid.UUID, session: AsyncSession = Depends(get_session)
+) -> SimulationQueryRead:
+    seed = await seed_builder_service.get_simulation_query_for_project(
+        session, project_id
+    )
+    return SimulationQueryRead(
+        project_id=project_id,
+        scenario_id=seed.scenario_id,
+        seed_material_id=seed.id,
+        seed_status=seed.status,
+        simulation_query=seed.simulation_query,
+    )
 
 
 @router.patch("/{project_id}", response_model=ProjectRead)

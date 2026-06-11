@@ -33,7 +33,9 @@ export const AGENT_ROLE_COLORS: Record<AgentRole, string> = {
   mentor: "hsl(320 50% 55%)",
 };
 
-export type SimulationDepth = "quick" | "standard" | "deep";
+export type SimulationDepth = "quick" | "standard" | "deep" | "custom";
+
+export const SIMULATION_DEPTHS = ["quick", "standard", "deep", "custom"] as const;
 
 export interface DepthConfig {
   label: string;
@@ -96,4 +98,69 @@ export const DEPTH_CONFIGS: Record<SimulationDepth, DepthConfig> = {
       mentor: 2,
     },
   },
+  custom: {
+    label: "Custom",
+    emoji: "✏️",
+    agentCount: 81,
+    estimatedTime: "Varies",
+    description: "Set your own agent count",
+    distribution: {
+      consumer: 50,
+      enterprise_buyer: 15,
+      competitor: 5,
+      investor: 3,
+      supplier: 3,
+      regulator: 2,
+      technical_expert: 2,
+      mentor: 1,
+    },
+  },
 };
+
+/** Standard ratios — used to scale custom agent totals. */
+export const DISTRIBUTION_TEMPLATE = DEPTH_CONFIGS.standard.distribution;
+
+export function scaleDistribution(
+  template: Record<AgentRole, number>,
+  targetTotal: number
+): Record<AgentRole, number> {
+  if (targetTotal <= 0) {
+    return Object.fromEntries(AGENT_ROLES.map((r) => [r, 0])) as Record<AgentRole, number>;
+  }
+
+  const templateTotal = Object.values(template).reduce((a, b) => a + b, 0);
+  if (templateTotal === 0) {
+    return Object.fromEntries(AGENT_ROLES.map((r) => [r, 0])) as Record<AgentRole, number>;
+  }
+
+  const scaled = AGENT_ROLES.map((role) => ({
+    role,
+    exact: (template[role] / templateTotal) * targetTotal,
+  }));
+
+  const result = Object.fromEntries(
+    scaled.map(({ role, exact }) => [role, Math.floor(exact)])
+  ) as Record<AgentRole, number>;
+
+  let remainder = targetTotal - Object.values(result).reduce((a, b) => a + b, 0);
+  const byFraction = [...scaled]
+    .map(({ role, exact }) => ({ role, frac: exact - Math.floor(exact) }))
+    .sort((a, b) => b.frac - a.frac);
+
+  for (let i = 0; remainder > 0; i++) {
+    result[byFraction[i % byFraction.length].role]++;
+    remainder--;
+  }
+
+  return result;
+}
+
+export function estimateTimeForAgentCount(count: number): string {
+  if (count <= 20) return "~2 min";
+  if (count <= 81) return "~10 min";
+  if (count <= 221) return "~30 min";
+  return `~${Math.max(5, Math.round(count / 7))} min`;
+}
+
+export const CUSTOM_AGENT_COUNT_MIN = 1;
+export const CUSTOM_AGENT_COUNT_MAX = 500;

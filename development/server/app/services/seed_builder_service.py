@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import uuid
@@ -19,6 +20,7 @@ from app.models.scenario import SimulationScenario
 from app.models.seed_material import SeedMaterial
 from app.schemas.seed_material import SeedMaterialUpdate
 from app.services.market_qa_parse import base_description, parse_additional_information
+from app.services.simulation_query_service import generate_simulation_query
 
 logger = logging.getLogger(__name__)
 
@@ -84,15 +86,32 @@ async def generate_seed_materials(
         agent_distribution=agent_distribution,
     )
 
+    query_task = generate_simulation_query(project, scenario)
+    seed_task = chat_completion(
+        messages=[
+            {"role": "system", "content": SEED_BUILDER_SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        json_mode=True,
+        max_tokens=seed_builder_max_tokens(scenario.agent_depth),
+    )
+
+    query_result, seed_result = await asyncio.gather(
+        query_task, seed_task, return_exceptions=True
+    )
+    if isinstance(query_result, str):
+        seed.simulation_query = query_result
+    else:
+        logger.warning("Simulation query generation failed: %s", query_result)
+
+    if isinstance(seed_result, BaseException):
+        content = seed_result
+    else:
+        content = seed_result
+
     try:
-        content = await chat_completion(
-            messages=[
-                {"role": "system", "content": SEED_BUILDER_SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-            json_mode=True,
-            max_tokens=seed_builder_max_tokens(scenario.agent_depth),
-        )
+        if isinstance(content, BaseException):
+            raise content
     except LLMNotConfiguredError:
         seed.status = "failed"
         seed.error_message = "LLM service not configured"
@@ -161,6 +180,31 @@ async def get_seed_material(
     if seed is None:
         raise HTTPException(status_code=404, detail="Seed material not found")
     return seed
+
+
+async def get_simulation_query_for_project(
+    session: AsyncSession, project_id: uuid.UUID
+) -> SeedMaterial:
+    """Return the latest seed material with simulation_query for a project's primary scenario."""
+    from fastapi import HTTPException
+
+    from app.services import project_service, scenario_service
+
+    await project_service.get_project(session, project_id)
+    scenarios, _ = await scenario_service.list_scenarios(session, project_id, 1, 1)
+    if not scenarios:
+        raise HTTPException(
+            status_code=404, detail="No simulation scenario for this project"
+        )
+    seeds = await get_seed_materials(session, scenarios[0].id)
+    if not seeds:
+        raise HTTPException(
+            status_code=404, detail="Pre-simulation display not generated yet"
+        )
+    latest = seeds[0]
+    if not latest.simulation_query:
+        raise HTTPException(status_code=404, detail="Simulation query not available")
+    return latest
 
 
 async def update_seed_material(

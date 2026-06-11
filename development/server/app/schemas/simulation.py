@@ -49,6 +49,10 @@ class SimulationAgentsResponse(CamelModel):
         default_factory=list,
         description="Questions and answers from the Market Info wizard step",
     )
-    sim_config_type: Literal["quick", "standard", "deep"] = Field(
+    sim_config_type: Literal["quick", "standard", "deep", "custom"] = Field(
         description="Simulation depth selected in Sim Config (agent_depth)"
+    )
+    simulation_query: str | None = Field(
+        default=None,
+        description="Natural-language simulation brief generated at pre-simulation display",
     )

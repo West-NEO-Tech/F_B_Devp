@@ -115,7 +115,7 @@ export function ProjectInfoCard({
                 <AlertDialogTitle>Delete project?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This will permanently remove <span className="font-medium">{project.name}</span>{" "}
-                  and all related scenarios, seed materials, and simulation runs. This action
+                  and all related scenarios, pre-simulation display data, and simulation runs. This action
                   cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>

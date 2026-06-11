@@ -9,9 +9,11 @@ from app.llm.client import (
 )
 from app.llm.prompts import (
     SEED_BUILDER_SYSTEM_PROMPT,
+    SIMULATION_QUERY_SYSTEM_PROMPT,
     SYSTEM_PROMPT,
     build_ai_complete_prompt,
     build_seed_builder_prompt,
+    build_simulation_query_prompt,
     seed_builder_max_tokens,
 )
 
@@ -27,5 +29,7 @@ __all__ = [
     "build_ai_complete_prompt",
     "SEED_BUILDER_SYSTEM_PROMPT",
     "build_seed_builder_prompt",
+    "build_simulation_query_prompt",
     "seed_builder_max_tokens",
+    "SIMULATION_QUERY_SYSTEM_PROMPT",
 ]

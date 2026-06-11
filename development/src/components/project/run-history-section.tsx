@@ -16,7 +16,7 @@ export function RunHistorySection({ seedMaterials }: RunHistorySectionProps) {
         <div className="rounded-lg border border-dashed border-border p-8 text-center">
           <div className="text-2xl opacity-40 mb-2">📭</div>
           <div className="text-xs text-muted-foreground/60">
-            No simulation runs yet. Configure and generate seed materials to start.
+            No simulation runs yet. Configure and generate pre-simulation display to start.
           </div>
         </div>
       ) : (

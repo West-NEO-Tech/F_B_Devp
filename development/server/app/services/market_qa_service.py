@@ -16,6 +16,8 @@ SYSTEM = (
     f"Always return at least {MIN_QUESTIONS} questions. "
     "Follow the priority rule in the user message: ask about missing Target Market, "
     "Target Audience, Pricing, and Competitors before supplemental analysis questions. "
+    "If the user has no clear simulation business goal, the LAST question must ask what "
+    "this run should decide or validate (id simulation_business_goal). "
     "Each question must be detailed and reference specifics from the user's description. "
     "Pack all needed detail into the question text; always return ask_for as []."
 )
@@ -254,7 +256,10 @@ def _single_question_prompt(
         min(index, target_count - 1)
     ]
     focus = priority.slot_focus_hint(slot_id)
+    is_last = index == target_count - 1
+    goal_rule = priority.business_goal_prompt_rule(description, is_last_slot=is_last)
     prev = "\n".join(f"- {q.question}" for q in existing) or "(none yet)"
+    goal_section = f"\n\n{goal_rule}" if goal_rule else ""
     return f"""
 Idea Description:
 {description}
@@ -262,7 +267,7 @@ Idea Description:
 Product Type:
 {pt}
 
-{priority.priority_prompt_section(description)}
+{priority.priority_prompt_section(description)}{goal_section}
 
 Generate exactly ONE follow-up question (index {index + 1} of {target_count}).
 Primary focus for this question: {focus}

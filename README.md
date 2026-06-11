@@ -11,26 +11,15 @@
 
 ### 后端 API 平台
 
-- 平台：Render
-- 特点：
-  - 免费方案可用
-  - 服务在低频访问时会休眠
-  - 冷启动（第一次访问）大约需要 1分钟
-  - 如果未预热，API 请求可能需要约 1 分钟返回
-
-建议在正式调用 API 前，先访问一次文档页进行预热：
-
-- [https://f-b-devp.onrender.com/docs](https://f-b-devp.onrender.com/docs)
+- 平台：vercel
 
 ## API 接口文档
 
-- 在线文档：[https://f-b-devp.onrender.com/docs](https://f-b-devp.onrender.com/docs)
-
-
+- 在线文档：[https://f-b-devp-dqtc2n39m-taige-zhaos-projects.vercel.app/docs](https://f-b-devp-dqtc2n39m-taige-zhaos-projects.vercel.app/docs)
 
 ### API 测试示例（GET /api/env）
 
-访问 [https://f-b-devp.onrender.com/api/env](https://f-b-devp.onrender.com/api/env)（或在终端执行下面的 `curl`）可得到结构化 JSON；字段含义与当前示例如下。
+访问 [https://f-b-devp-dqtc2n39m-taige-zhaos-projects.vercel.app/api/env](https://f-b-devp-dqtc2n39m-taige-zhaos-projects.vercel.app/api/env)（或在终端执行下面的 `curl`）可得到结构化 JSON；字段含义与当前示例如下。
 
 - **userPersona**：用户画像与市场侧写。示例：`25–40 岁一线及新一线城市职场人；重视效率与可信度；愿意为省时间付费；习惯移动端完成决策；对竞品价格敏感。`
 - **businessGoal**：业务目标。示例：`6 个月内跑通 MVP：获取 3000 名注册用户，付费转化率达到 8%，单客获客成本控制在 120 元以内。`

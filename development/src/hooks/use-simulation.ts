@@ -13,7 +13,7 @@ export interface MarketInfoQAItem {
   answer: string;
 }
 
-export type SimConfigType = "quick" | "standard" | "deep";
+export type SimConfigType = "quick" | "standard" | "deep" | "custom";
 
 /** Simulation run input for external clients (GET /api/runs/{runId}/agents). */
 export interface SimulationAgentsResponse {
@@ -28,6 +28,7 @@ export interface SimulationAgentsResponse {
   discussionTopics: string[];
   additionalInformation: MarketInfoQAItem[];
   simConfigType: SimConfigType;
+  simulationQuery?: string | null;
 }
 
 export interface SimulationStartInput {

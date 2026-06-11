@@ -30,6 +30,7 @@ export interface SeedMaterialRead {
     description?: string;
     relevance?: string;
   }[] | null;
+  simulationQuery: string | null;
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
@@ -55,7 +56,7 @@ export function useLatestSeedMaterial(scenarioId: string | undefined) {
 }
 
 export interface SeedMaterialGenerateInput {
-  agentDepth: "quick" | "standard" | "deep";
+  agentDepth: "quick" | "standard" | "deep" | "custom";
   agentCount: number;
   marketConfig: { agent_distribution: Record<string, number> };
 }

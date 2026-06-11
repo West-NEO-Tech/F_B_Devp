@@ -147,3 +147,56 @@ Counts: exactly {n_competitors} competitors, {n_personas} personas, {n_topics} t
 Do not add extra keys. No strengths/weaknesses/pain_points arrays.""")
 
     return "\n".join(lines)
+
+
+SIMULATION_QUERY_SYSTEM_PROMPT = (
+    "You are a business simulation scenario writer. "
+    "Given a project brief and follow-up Q&A, write ONE cohesive natural-language simulation query. "
+    "Output plain text only: no JSON, no markdown headings, no bullet lists. "
+    "Use 2-4 short paragraphs. Write like a vivid policy-or-market shock brief that sets up a multi-agent simulation."
+)
+
+
+def build_simulation_query_prompt(
+    *,
+    project_name: str,
+    product_type: str | None,
+    overview: str,
+    additional_qa: list[dict[str, str]],
+    agent_depth: str,
+    agent_count: int,
+    agent_roles_phrase: str,
+) -> str:
+    lines = [f"Project: {project_name}"]
+    if product_type:
+        lines.append(f"Product type: {product_type}")
+    lines.append(f"Simulation depth: {agent_depth} ({agent_count} agents)")
+    lines.append(f"Agent roles in this run: {agent_roles_phrase}")
+    lines.append("")
+    lines.append("## Project overview (description)")
+    lines.append(overview.strip() or "(not provided)")
+    lines.append("")
+    if additional_qa:
+        lines.append("## Additional information (Market Info Q&A)")
+        for item in additional_qa:
+            lines.append(f"Q: {item['question']}")
+            lines.append(f"A: {item['answer']}")
+            lines.append("")
+    lines.append("""
+## Your task
+
+Write a single simulation query that we will send to a multi-agent market simulator.
+
+Requirements:
+1. Weave ALL user-provided facts into a flowing narrative (do not omit material details from the Q&A).
+2. Structure the story implicitly with: background context, constraints/limitations, additional conditions, and the commercial or strategic purpose of this simulation.
+3. End by asking how the listed agent roles each respond, what collective dynamics and narratives emerge, who adapts vs. hesitates, and what opportunities or risks surface — tailored to THIS project (not a generic template).
+4. Match the tone of a professional scenario brief (see style reference below).
+
+Style reference (structure and tone only — do NOT copy topic or geography):
+"The Western Australian state government just announced an emergency 7% stamp duty surcharge on all residential property purchases by foreign investors, effective immediately. Simultaneously, the RBA cut interest rates by 50 basis points.
+
+Simulate how these two simultaneous policy shocks ripple through the Perth property market: how do foreign investors, local first-home buyers, existing landlords, real estate agents, and the regulator each respond? What collective market dynamics and narratives emerge from their interactions over the following weeks? Who adapts, who panics, and what opportunities or risks surface?"
+
+Return only the final simulation query text.""")
+    return "\n".join(lines)

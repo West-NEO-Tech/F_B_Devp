@@ -1,5 +1,6 @@
 from app.models.agent_template import AgentTemplate
 from app.models.base import Base
+from app.models.pre_simulation_display import PreSimulationDisplay
 from app.models.project import Project
 from app.models.run import SimulationRun
 from app.models.scenario import SimulationScenario
@@ -12,4 +13,5 @@ __all__ = [
     "SimulationRun",
     "AgentTemplate",
     "SeedMaterial",
+    "PreSimulationDisplay",
 ]

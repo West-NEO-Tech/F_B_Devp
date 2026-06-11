@@ -25,3 +25,9 @@ class Project(BaseMixin, Base):
     scenarios = relationship(
         "SimulationScenario", back_populates="project", cascade="all, delete-orphan"
     )
+    pre_simulation_display = relationship(
+        "PreSimulationDisplay",
+        back_populates="project",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )

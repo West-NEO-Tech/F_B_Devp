@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -6,17 +7,19 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pythonjsonlogger import jsonlogger
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError
 
 from app.config import settings
 from app.database import async_session_factory, engine
 from app.llm import LLMServiceError
 from app.middleware.logging import RequestLoggingMiddleware
+from app.migrate import upgrade_to_head
 from app.routers import (
     agent_templates,
     env_demo,
     health,
     market_qa,
+    pre_simulation_display,
     projects,
     runs,
     scenarios,
@@ -49,6 +52,11 @@ async def lifespan(app: FastAPI):
     if settings.skip_seed:
         logger.info("Seed data skipped — SKIP_SEED=true")
     else:
+        if not settings.is_serverless:
+            try:
+                await asyncio.to_thread(upgrade_to_head)
+            except Exception as exc:
+                logger.warning("Database migration skipped: %s", exc)
         try:
             async with async_session_factory() as session:
                 from seed.agent_templates import seed_agent_templates
@@ -90,6 +98,7 @@ def create_app() -> FastAPI:
     application.include_router(health.router)
     application.include_router(env_demo.router)
     application.include_router(projects.router)
+    application.include_router(pre_simulation_display.router)
     application.include_router(scenarios.router)
     application.include_router(runs.router)
     application.include_router(agent_templates.router)
@@ -102,6 +111,20 @@ def create_app() -> FastAPI:
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
         return JSONResponse(status_code=422, content={"detail": exc.errors()})
+
+    @application.exception_handler(IntegrityError)
+    async def integrity_exception_handler(
+        request: Request, exc: IntegrityError
+    ) -> JSONResponse:
+        logging.getLogger("bizsim").error("Database integrity error: %s", str(exc))
+        detail = "Database constraint violation."
+        msg = str(exc.orig) if exc.orig else str(exc)
+        if "agent_depth" in msg:
+            detail = (
+                "Invalid simulation depth. Run database migrations: "
+                "cd development/server && uv run alembic upgrade head"
+            )
+        return JSONResponse(status_code=409, content={"detail": detail})
 
     @application.exception_handler(OperationalError)
     async def db_exception_handler(

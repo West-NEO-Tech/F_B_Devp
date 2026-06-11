@@ -9,6 +9,10 @@ import {
   useGenerateSeedMaterials,
   useUpdateSeedMaterial,
 } from "@/hooks/use-seed-materials";
+import {
+  usePreSimulationDisplay,
+  useAgentDistribution,
+} from "@/hooks/use-pre-simulation-display";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,7 +36,13 @@ import { LockedStepCard } from "@/components/project/locked-step-card";
 import { RunHistorySection } from "@/components/project/run-history-section";
 import { SimulationReportPanel } from "@/components/project/simulation-report-panel";
 import { useStartSimulation, useRunStatus } from "@/hooks/use-simulation";
-import { DEPTH_CONFIGS, type SimulationDepth, type AgentRole } from "@/lib/agent-templates";
+import {
+  DEPTH_CONFIGS,
+  scaleDistribution,
+  DISTRIBUTION_TEMPLATE,
+  type SimulationDepth,
+  type AgentRole,
+} from "@/lib/agent-templates";
 import type { ProjectUpdate } from "@/types/api";
 
 function isProjectInfoComplete(project: { name: string; productType?: string | null }): boolean {
@@ -57,6 +67,8 @@ export default function ProjectDetailPage() {
   }, [scenarioLoading, scenario, id]);
   const { data: latestSeed } = useLatestSeedMaterial(scenario?.id);
   const { data: allSeeds } = useSeedMaterials(scenario?.id);
+  const { data: preSimulationDisplay } = usePreSimulationDisplay(id);
+  const { data: uploadedAgentDistribution } = useAgentDistribution(id);
 
   const updateProject = useUpdateProject(id!);
   const deleteProject = useDeleteProject(id!);
@@ -84,6 +96,9 @@ export default function ProjectDetailPage() {
 
   // Local simulation config state — initialised lazily; synced when scenario loads
   const [depth, setDepth] = useState<SimulationDepth>("standard");
+  const [customAgentCount, setCustomAgentCount] = useState(
+    DEPTH_CONFIGS.custom.agentCount
+  );
   const [distribution, setDistribution] = useState<Record<AgentRole, number>>(
     () => ({ ...DEPTH_CONFIGS["standard"].distribution })
   );
@@ -91,10 +106,18 @@ export default function ProjectDetailPage() {
   // Sync local state once the async scenario data arrives (or changes)
   useEffect(() => {
     if (!scenario) return;
-    if (scenario.agentDepth) setDepth(scenario.agentDepth as SimulationDepth);
+    const loadedDepth = (scenario.agentDepth as SimulationDepth) || "standard";
+    setDepth(loadedDepth);
+    if (loadedDepth === "custom") {
+      setCustomAgentCount(scenario.agentCount);
+    }
     const dist = (scenario.marketConfig as Record<string, unknown>)?.agent_distribution;
     if (dist && typeof dist === "object") {
       setDistribution(dist as Record<AgentRole, number>);
+    } else if (loadedDepth === "custom") {
+      setDistribution(scaleDistribution(DISTRIBUTION_TEMPLATE, scenario.agentCount));
+    } else if (loadedDepth in DEPTH_CONFIGS) {
+      setDistribution({ ...DEPTH_CONFIGS[loadedDepth].distribution });
     }
   }, [scenario?.id]);
 
@@ -111,7 +134,7 @@ export default function ProjectDetailPage() {
     },
     {
       id: "seed",
-      label: "Seed Materials",
+      label: "Pre-Simulation Display",
       status: hasSeed ? "completed" : infoComplete ? "active" : "locked",
     },
     {
@@ -185,7 +208,7 @@ export default function ProjectDetailPage() {
     setActiveTab("seed");
     generateSeed.mutate(config, {
       onSuccess: () => {
-        toast({ title: "Seed materials generated" });
+        toast({ title: "Pre-Simulation Display generated" });
       },
       onError: (err) => {
         const message =
@@ -305,8 +328,10 @@ export default function ProjectDetailPage() {
             <SimulationConfigCard
               depth={depth}
               distribution={distribution}
+              customAgentCount={customAgentCount}
               onDepthChange={setDepth}
               onDistributionChange={setDistribution}
+              onCustomAgentCountChange={setCustomAgentCount}
               onGenerate={handleGenerate}
               isGenerating={generateSeed.isPending}
             />
@@ -315,11 +340,14 @@ export default function ProjectDetailPage() {
           )
         )}
 
-        {/* Seed Materials tab */}
+        {/* Pre-Simulation Display tab */}
         {activeTab === "seed" && (
           latestSeed ? (
             <SeedMaterialsCard
               seedMaterial={latestSeed}
+              distribution={distribution}
+              agentKinds={uploadedAgentDistribution?.agentKinds}
+              uploadedDisplay={preSimulationDisplay?.content ?? null}
               onRegenerate={handleGenerate}
               onUpdateConsumerPersonas={(consumerPersonas) =>
                 updateSeed.mutate({ consumerPersonas })
@@ -336,12 +364,12 @@ export default function ProjectDetailPage() {
               <CardContent className="flex flex-col items-center gap-3 py-12">
                 <div className="h-6 w-6 animate-pulse rounded-full bg-primary/20" />
                 <p className="text-sm text-muted-foreground">
-                  Analyzing market and generating seed materials...
+                  Analyzing market and building pre-simulation display...
                 </p>
               </CardContent>
             </Card>
           ) : (
-            <LockedStepCard title="Seed Materials" phaseLabel="Generate from Sim Config first" />
+            <LockedStepCard title="Pre-Simulation Display" phaseLabel="Generate from Sim Config first" />
           )
         )}
 
@@ -351,10 +379,10 @@ export default function ProjectDetailPage() {
             activeRunId ? (
               <SimulationReportPanel run={runData} isLoading={runLoading} isError={runError} />
             ) : (
-              <LockedStepCard title="Report" phaseLabel="Start from Seed Materials tab" />
+              <LockedStepCard title="Report" phaseLabel="Start from Pre-Simulation Display tab" />
             )
           ) : (
-            <LockedStepCard title="Report" phaseLabel="Complete seed materials first" />
+            <LockedStepCard title="Report" phaseLabel="Complete pre-simulation display first" />
           )
         )}
       </div>

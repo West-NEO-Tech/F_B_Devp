@@ -37,7 +37,7 @@ class DiscussionTopicSchema(CamelModel):
 class SeedMaterialGenerate(CamelModel):
     """Optional sim config applied atomically before generation (saves a round trip)."""
 
-    agent_depth: Literal["quick", "standard", "deep"] | None = None
+    agent_depth: Literal["quick", "standard", "deep", "custom"] | None = None
     agent_count: int | None = Field(default=None, gt=0)
     market_config: dict | None = None
 
@@ -50,7 +50,21 @@ class SeedMaterialRead(TimestampMixin):
     competitors: list[dict] | None
     consumer_personas: list[dict] | None
     discussion_topics: list[dict] | None
+    simulation_query: str | None = Field(
+        default=None,
+        description="LLM-synthesized natural-language simulation brief for external runners",
+    )
     error_message: str | None
+
+
+class SimulationQueryRead(CamelModel):
+    """Latest simulation query for a project (via its primary scenario)."""
+
+    project_id: uuid.UUID
+    scenario_id: uuid.UUID
+    seed_material_id: uuid.UUID
+    seed_status: str
+    simulation_query: str
 
 
 class SeedMaterialUpdate(CamelModel):

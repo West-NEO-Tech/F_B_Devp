@@ -59,17 +59,55 @@ async def _create_project_and_scenario(client: AsyncClient) -> tuple[str, str]:
 
 
 @pytest.mark.asyncio
-async def test_generate_seed_materials(client: AsyncClient):
+async def test_generate_seed_materials_custom_depth(client: AsyncClient):
     _, scenario_id = await _create_project_and_scenario(client)
+    dist = {
+        "consumer": 100,
+        "enterprise_buyer": 30,
+        "competitor": 8,
+        "investor": 5,
+        "supplier": 5,
+        "regulator": 2,
+        "technical_expert": 2,
+        "mentor": 1,
+    }
 
     with _patch_chat_completion():
         resp = await client.post(
-            f"/api/scenarios/{scenario_id}/seed-materials"
+            f"/api/scenarios/{scenario_id}/seed-materials",
+            json={
+                "agentDepth": "custom",
+                "agentCount": 153,
+                "marketConfig": {"agent_distribution": dist},
+            },
         )
 
     assert resp.status_code == 201
     data = resp.json()
     assert data["status"] == "completed"
+
+    scenario = await client.get(f"/api/scenarios/{scenario_id}")
+    assert scenario.json()["agentDepth"] == "custom"
+    assert scenario.json()["agentCount"] == 153
+
+
+@pytest.mark.asyncio
+async def test_generate_seed_materials(client: AsyncClient):
+    _, scenario_id = await _create_project_and_scenario(client)
+
+    with patch(
+        "app.services.seed_builder_service.generate_simulation_query",
+        AsyncMock(return_value="Simulate market response to the product launch."),
+    ):
+        with _patch_chat_completion():
+            resp = await client.post(
+                f"/api/scenarios/{scenario_id}/seed-materials"
+            )
+
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["status"] == "completed"
+    assert data["simulationQuery"] == "Simulate market response to the product launch."
     assert data["version"] == 1
     assert data["scenarioId"] == scenario_id
     assert data["marketContext"]["market_size"] == "$85M"
@@ -180,4 +218,43 @@ async def test_generate_seed_materials_llm_failure(client: AsyncClient):
 async def test_seed_material_not_found(client: AsyncClient):
     fake_id = "00000000-0000-0000-0000-000000000000"
     resp = await client.get(f"/api/seed-materials/{fake_id}")
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_simulation_query_by_project_id(client: AsyncClient):
+    project_id, scenario_id = await _create_project_and_scenario(client)
+    query_text = "Simulate market response to the product launch."
+
+    with patch(
+        "app.services.seed_builder_service.generate_simulation_query",
+        AsyncMock(return_value=query_text),
+    ):
+        with _patch_chat_completion():
+            await client.post(f"/api/scenarios/{scenario_id}/seed-materials")
+
+    resp = await client.get(f"/api/projects/{project_id}/simulation-query")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["projectId"] == project_id
+    assert data["scenarioId"] == scenario_id
+    assert data["seedStatus"] == "completed"
+    assert data["simulationQuery"] == query_text
+    assert "seedMaterialId" in data
+
+
+@pytest.mark.asyncio
+async def test_get_simulation_query_no_scenario(client: AsyncClient):
+    proj_resp = await client.post("/api/projects", json={"name": "No Scenario"})
+    project_id = proj_resp.json()["id"]
+
+    resp = await client.get(f"/api/projects/{project_id}/simulation-query")
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_simulation_query_no_seed(client: AsyncClient):
+    project_id, _ = await _create_project_and_scenario(client)
+
+    resp = await client.get(f"/api/projects/{project_id}/simulation-query")
     assert resp.status_code == 404

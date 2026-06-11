@@ -32,6 +32,7 @@ class SeedMaterial(BaseMixin, Base):
     consumer_personas: Mapped[list | None] = mapped_column(JSON, nullable=True)
     discussion_topics: Mapped[list | None] = mapped_column(JSON, nullable=True)
     raw_response: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    simulation_query: Mapped[str | None] = mapped_column(Text, nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     scenario = relationship("SimulationScenario", back_populates="seed_materials")

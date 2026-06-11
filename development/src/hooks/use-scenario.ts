@@ -7,7 +7,7 @@ interface ScenarioRead {
   name: string;
   description: string | null;
   agentCount: number;
-  agentDepth: "quick" | "standard" | "deep";
+  agentDepth: "quick" | "standard" | "deep" | "custom";
   marketConfig: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
@@ -17,7 +17,7 @@ interface ScenarioUpdate {
   name?: string;
   description?: string | null;
   agentCount?: number;
-  agentDepth?: "quick" | "standard" | "deep";
+  agentDepth?: "quick" | "standard" | "deep" | "custom";
   marketConfig?: Record<string, unknown>;
 }
 
