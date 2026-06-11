@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pythonjsonlogger import jsonlogger
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 
 from app.config import settings
 from app.database import async_session_factory, engine
@@ -125,6 +125,21 @@ def create_app() -> FastAPI:
                 "cd development/server && uv run alembic upgrade head"
             )
         return JSONResponse(status_code=409, content={"detail": detail})
+
+    @application.exception_handler(ProgrammingError)
+    async def schema_exception_handler(
+        request: Request, exc: ProgrammingError
+    ) -> JSONResponse:
+        logging.getLogger("bizsim").error("Database schema error: %s", str(exc))
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": (
+                    "Database schema is out of date. "
+                    "Run: cd development/server && uv run alembic upgrade head"
+                )
+            },
+        )
 
     @application.exception_handler(OperationalError)
     async def db_exception_handler(

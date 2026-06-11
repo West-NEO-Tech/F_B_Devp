@@ -10,10 +10,16 @@ import { toast } from "@/hooks/use-toast";
  *   4xx → throw Error with server message (caller handles display)
  *   2xx → return parsed JSON
  */
+export interface ApiRequestOptions {
+  /** Suppress the global 5xx toast (caller handles the error). */
+  silentServerError?: boolean;
+}
+
 export async function apiRequest<T = unknown>(
   method: string,
   url: string,
   data?: unknown,
+  options?: ApiRequestOptions,
 ): Promise<T> {
   let response: Response;
 
@@ -33,11 +39,13 @@ export async function apiRequest<T = unknown>(
   }
 
   if (response.status >= 500) {
-    toast({
-      title: "服务器异常",
-      description: `${response.status} ${response.statusText}`,
-      variant: "destructive",
-    });
+    if (!options?.silentServerError) {
+      toast({
+        title: "服务器异常",
+        description: `${response.status} ${response.statusText}`,
+        variant: "destructive",
+      });
+    }
     throw new Error(`Server error: ${response.status}`);
   }
 

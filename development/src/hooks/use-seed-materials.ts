@@ -46,6 +46,19 @@ export function useSeedMaterials(scenarioId: string | undefined) {
   return useQuery<SeedMaterialRead[]>({
     queryKey: [`/api/scenarios/${scenarioId}/seed-materials`],
     enabled: !!scenarioId,
+    retry: false,
+    queryFn: async () => {
+      try {
+        return await apiRequest<SeedMaterialRead[]>(
+          "GET",
+          `/api/scenarios/${scenarioId}/seed-materials`,
+          undefined,
+          { silentServerError: true }
+        );
+      } catch {
+        return [];
+      }
+    },
   });
 }
 

@@ -32,7 +32,9 @@ export function usePreSimulationDisplay(projectId: string | undefined) {
       try {
         return await apiRequest<PreSimulationDisplayRead>(
           "GET",
-          `/api/projects/${projectId}/pre-simulation-display`
+          `/api/projects/${projectId}/pre-simulation-display`,
+          undefined,
+          { silentServerError: true }
         );
       } catch {
         return null;
@@ -50,7 +52,9 @@ export function useAgentDistribution(projectId: string | undefined) {
       try {
         return await apiRequest<AgentDistributionRead>(
           "GET",
-          `/api/projects/${projectId}/pre-simulation-display/agent-distribution`
+          `/api/projects/${projectId}/pre-simulation-display/agent-distribution`,
+          undefined,
+          { silentServerError: true }
         );
       } catch {
         return null;
