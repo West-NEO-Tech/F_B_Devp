@@ -1,7 +1,10 @@
 import asyncio
+import os
 from collections.abc import AsyncGenerator
 
 import pytest
+
+os.environ.setdefault("SKIP_MIGRATIONS", "1")
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (

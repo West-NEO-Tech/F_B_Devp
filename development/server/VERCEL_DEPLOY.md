@@ -29,7 +29,8 @@ server/
 
 | 变量名 | 值 | 说明 |
 | --- | --- | --- |
-| `DATABASE_URL` | Neon/Supabase 的 `postgresql://...` 连接串 | 用 **pooler/transaction mode** 端点（Serverless 不能持有连接）|
+| `DATABASE_URL` | Neon **pooler** 连接串（`*-pooler.*.neon.tech`） | 运行时 API 查询用 |
+| `DATABASE_URL_UNPOOLED` | Neon **direct** 连接串（无 pooler 主机名） | **迁移用**（Vercel+Neon 集成会自动注入）；无则回退 `DATABASE_URL` |
 | `LLM_BASE_URL` | `https://openrouter.ai/api/v1` | OpenRouter / 其他 OpenAI 兼容入口 |
 | `LLM_API_KEY` | `sk-or-...` | 对应的 API Key |
 | `LLM_MODEL` | `openai/gpt-4o-mini` | 模型名 |
@@ -37,8 +38,10 @@ server/
 | `SKIP_SEED` | `true` | Serverless 冷启动跳过 seed（**迁移仍会自动执行**） |
 | `LOG_LEVEL` | `INFO` | 可选 |
 
-⚠️ **Neon 连接串注意**: 使用 `*-pooler.*.neon.tech` 的 host，并在末尾加 `?sslmode=require`。
-代码 (`app/config.py`) 会自动把 `postgresql://` 转成 `postgresql+asyncpg://`。
+⚠️ **Neon 连接串注意**:
+- 运行时：`DATABASE_URL` 用 **pooler** 端点 + `?sslmode=require`
+- 迁移：务必配置 **`DATABASE_URL_UNPOOLED`**（direct 端点）。经 pooler 跑 DDL 常会失败。
+- 代码会自动把 `postgresql://` 转成 `postgresql+asyncpg://`（运行时）和 `postgresql+psycopg://`（Alembic）。
 
 ### 3. 数据库迁移
 

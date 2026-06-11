@@ -4,14 +4,7 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
-def _normalize_database_url(url: str) -> str:
-    if url.startswith("postgresql+asyncpg://"):
-        return url
-    if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+asyncpg://", 1)
-    return url
+from app.db_url import normalize_async_url
 
 
 class Settings(BaseSettings):
@@ -47,7 +40,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def normalize_env_urls(self):
         # Render injects DATABASE_URL as postgres://...; SQLAlchemy async engine needs asyncpg.
-        self.database_url = _normalize_database_url(self.database_url)
+        self.database_url = normalize_async_url(self.database_url)
         if self.llm_base_url:
             url = self.llm_base_url.strip().rstrip("/")
             # OpenAI-compatible APIs expect /v1 (OpenRouter, VectorEngine, LiteLLM, etc.)
