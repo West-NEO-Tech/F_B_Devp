@@ -39,3 +39,17 @@ model = ModelFactory.create(
 python# 在 OASIS 的 agent 配置中使用
 # 具体 API 取决于你的 OASIS 仿真脚本
 agent = YourSocialAgent(model=model, ...)
+
+
+The Western Australian state government just announced an emergency
+    7% stamp duty surcharge on all residential property purchases by
+    foreign investors, effective immediately. Simultaneously, the RBA
+    cut interest rates by 50 basis points.
+
+    Simulate how these two simultaneous policy shocks ripple through
+    the Perth property market: how do foreign investors, local
+    first-home buyers, existing landlords, real estate agents, and
+    the regulator each respond? What collective market dynamics and
+    narratives emerge from their interactions over the following weeks?
+    Who adapts, who panics, and what opportunities or risks surface?
+这是今天demo的用户query
